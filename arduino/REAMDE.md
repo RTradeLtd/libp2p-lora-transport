@@ -1,6 +1,6 @@
 # arudino
 
-Contains arduino sketches
+Contains arduino sketches. Requires master branch of `https://github.com/sandeepmistry/arduino-LoRa`
 
 * `custom_firmata.ino` is a custom version of firmata that starts up the LoRa radio and allows controlling via gobot (TODO)
 * `firmata.ino` is a copy of the firmata sketch

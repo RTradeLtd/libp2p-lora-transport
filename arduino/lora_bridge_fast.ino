@@ -17,6 +17,7 @@ API documentation: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API
 Issues with timing: https://github.com/sandeepmistry/arduino-LoRa/issues/321
 Other example:
   * https://github.com/IoTThinks/EasyLoRaGateway_v2.1/blob/master/EasyLoRaGateway/09_lora.ino
+  * Useful doc https://www.arduino.cc/en/Tutorial/SerialCallResponse
 */
 
 void setup() {
@@ -28,9 +29,8 @@ void setup() {
     LoRa.setTxPower(TXPOWER);
     // register callbacks
     LoRa.onReceive(onReceive);
-    //  not yet released, only on master branch
-    //  LoRa.onTxDone(onTxDone);
-    // LoRa.enableCrc();
+    LoRa.onTxDone(onTxDone);
+    LoRa.enableCrc();
     //  LoRa.setSignalBandwidth(SIGBW);
     LoRa.receive(); // set receive mode, allows using callback
     Serial.println("ready");
@@ -64,7 +64,6 @@ void loop() {
         int num = Serial.readBytesUntil('\n', buffer, 255);
         LoRa.write(buffer, num);
         LoRa.endPacket(true); // async mode
-        onTxDone();
     } 
   }
 }

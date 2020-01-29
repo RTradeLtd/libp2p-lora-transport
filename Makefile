@@ -35,3 +35,8 @@ verifiers: staticcheck
 staticcheck:
 	@echo "Running $@ check"
 	@GO111MODULE=on ${GOPATH}/bin/staticcheck ./...
+
+
+.PHONY: arduino-deps
+arduino-deps:
+	sudo apt install arduino-mk python-serial -y
