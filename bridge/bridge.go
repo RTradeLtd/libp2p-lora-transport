@@ -13,11 +13,41 @@ import (
 	"github.com/tarm/serial"
 )
 
+// Bridge enables a LibP2P node to communicate over LoRa
+type Bridge struct {
+	serial     *serial.Port
+	ctx        context.Context
+	cancelFunc context.CancelFunc
+	mx         *sync.RWMutex
+}
+
+// Read processes data coming in from the serial interface
+func (b *Bridge) Read() {
+	b.mx.RLock()
+	data := make([]byte, 1024)
+	read, err := b.serial.Read(data)
+	if err != nil && err != io.EOF {
+		panic(err)
+	}
+	if read > 0 {
+		fmt.Println(string(data[:read]))
+	}
+	b.mx.RUnlock()
+}
+
+// Write sends data through the serial interface
+func (b *Bridge) Write(data []byte) (int, error) {
+	b.mx.Lock()
+	n, err := b.serial.Write(data)
+	b.mx.Unlock()
+	return n, err
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	config := &serial.Config{
 		Name: "/dev/ttyACM0",
-		Baud: 9600,
+		Baud: 115200,
 	}
 	sh, err := serial.OpenPort(config)
 	if err != nil {
@@ -37,11 +67,6 @@ func main() {
 		case <-ctx.Done():
 			goto FIN
 		default:
-			_, err := sh.Write([]byte("hello world"))
-			if err != nil && err != io.EOF {
-				fmt.Println("failed to write data: ", err.Error())
-				goto FIN
-			}
 			data := make([]byte, 1024)
 			read, err := sh.Read(data)
 			if err != nil && err != io.EOF {
