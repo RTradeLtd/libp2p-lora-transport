@@ -37,6 +37,7 @@ void loop() {
       char buffer[255];
       int num = LoRa.readBytes(buffer, 255);
       Serial.write(buffer, num);
+      Serial.flush();
   }
   // see if we have any data on the serial interface
   // if we do send it down hte LoRa radio
