@@ -27,7 +27,12 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go handleExit(ctx, cancel, wg, doneChan)
+	var (
+		dataBuffer []byte
+		delim      int
+	)
 	for {
+	START:
 		select {
 		case <-ctx.Done():
 			goto FIN
@@ -38,15 +43,33 @@ func main() {
 				goto FIN
 			}
 			data := make([]byte, 1024)
-			_, err = sh.Read(data)
+			read, err := sh.Read(data)
 			if err != nil && err != io.EOF {
 				fmt.Println("failed to read data: ", err.Error())
 				goto FIN
 			}
-			if data != nil {
-				fmt.Println(string(data))
+			if read > 0 {
+				dataBuffer = append(dataBuffer, data[:read]...)
+				count := 0
+				for _, c := range dataBuffer {
+					if c == '\n' {
+						delim = count
+						goto PRINT
+					}
+					count++
+				}
 			}
 		}
+	PRINT:
+		var trimmed []byte
+		for _, c := range dataBuffer[:delim] {
+			if c != ' ' {
+				trimmed = append(trimmed, c)
+			}
+		}
+		fmt.Println(string(trimmed))
+		dataBuffer = []byte{}
+		goto START
 	}
 FIN:
 	cancel()
