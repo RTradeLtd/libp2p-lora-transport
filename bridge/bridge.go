@@ -2,33 +2,54 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
-	"gobot.io/x/gobot"
-	"gobot.io/x/gobot/platforms/firmata"
+	"github.com/tarm/serial"
 )
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	firmataAdaptor := firmata.NewAdaptor("/dev/ttyACM0")
-
-	robot := gobot.NewRobot("bot",
-		[]gobot.Connection{firmataAdaptor},
-	)
+	config := &serial.Config{
+		Name: "/dev/ttyACM0",
+		Baud: 9600,
+	}
+	sh, err := serial.OpenPort(config)
+	if err != nil {
+		log.Fatal(err)
+	}
 	doneChan := make(chan bool, 1)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go handleExit(ctx, cancel, wg, doneChan)
-	robot.Start()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		<-doneChan
-		robot.Stop()
-	}()
+	for {
+		select {
+		case <-ctx.Done():
+			goto FIN
+		default:
+			_, err := sh.Write([]byte("hello world"))
+			if err != nil && err != io.EOF {
+				fmt.Println("failed to write data: ", err.Error())
+				goto FIN
+			}
+			data := make([]byte, 1024)
+			_, err = sh.Read(data)
+			if err != nil && err != io.EOF {
+				fmt.Println("failed to read data: ", err.Error())
+				goto FIN
+			}
+			if data != nil {
+				fmt.Println(string(data))
+			}
+		}
+	}
+FIN:
+	cancel()
 	wg.Wait()
 }
 
