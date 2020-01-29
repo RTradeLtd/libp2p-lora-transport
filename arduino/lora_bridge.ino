@@ -12,7 +12,7 @@
 #define SF 7
 #define TXPOWER 20
 #define SIGBW 250E3
-#define DATASENT "data sent"
+#define DATASENT 0xd34db33f
 /*
 API documentation: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md
 */
@@ -28,15 +28,30 @@ void setup() {
     Serial.println("ready");
 }
 
+void handleDebug() {
+  while (true) {
+    if (LoRa.parsePacket()) {
+        String message = "received packet: rssi " + String(LoRa.packetRssi()) + " snr " + String(LoRa.packetSnr()) + " freq error " + String(LoRa.packetFrequencyError());
+        Serial.println(message);
+        return;
+    }
+  }
+}
 void loop() {
   // try to parse packet
   if (LoRa.parsePacket()) {
-    //String message = "received packet: rssi " + String(LoRa.packetRssi()) + " snr " + String(LoRa.packetSnr()) + " freq error " + String(LoRa.packetFrequencyError());
     Serial.println(LoRa.readString());
   } else if (Serial.available()) {
     if (LoRa.beginPacket()) { // beginPacket returns 1 if ready to proceed, so wait until radio is ready
-        LoRa.print(Serial.readString());
+        String msg = Serial.readStringUntil('\n');
+        if (msg == "debug") {
+          Serial.println("handling debug");
+          handleDebug();
+          Serial.println("finished debug handle");
+        }
+        LoRa.print(msg);
         LoRa.endPacket(true); // async mode
+        Serial.println(msg);
         Serial.println(DATASENT);
     } 
   }
