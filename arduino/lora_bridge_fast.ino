@@ -14,6 +14,7 @@
 #define DATASENT 0xd34db33f
 /*
 API documentation: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md
+Issues with timing: https://github.com/sandeepmistry/arduino-LoRa/issues/321
 */
 
 void setup() {
@@ -23,22 +24,32 @@ void setup() {
     LoRa.setSyncWord(SYNC);
     LoRa.setSpreadingFactor(SF);
     LoRa.setTxPower(TXPOWER);
-    //LoRa.enableCrc();
-  //  LoRa.setSignalBandwidth(SIGBW);
+    // register callbacks
+    LoRa.onReceive(onReceive);
+    //  LoRa.onTxDone(onTxDone);
+    //  LoRa.enableCrc();
+    //  LoRa.setSignalBandwidth(SIGBW);
     Serial.println("ready");
     Serial.flush();
 }
 
-
-void loop() {
-  // see if we have any data on the LoRa radio
-  // if we do, send it down the serial interface
-  if (LoRa.parsePacket()) {
+// callback function whenever we receive a LoRa packet
+void onReceive(int packetSize) {
+  if (packetSize) {
       char buffer[255];
       int num = LoRa.readBytes(buffer, 255);
       Serial.write(buffer, num);
       Serial.flush();
   }
+}
+
+// callback function whenever we finished sending a LoRa packet
+void onTxDone() {
+  Serial.println(DATASENT);
+  Serial.flush();
+}
+
+void loop() {
   // see if we have any data on the serial interface
   // if we do send it down hte LoRa radio
   if (Serial.available()) {
@@ -47,8 +58,7 @@ void loop() {
         int num = Serial.readBytesUntil('\n', buffer, 255);
         LoRa.write(buffer, num);
         LoRa.endPacket(true); // async mode
-        Serial.println(DATASENT);
-        Serial.flush();
+        onTxDone();
     } 
   }
 }
