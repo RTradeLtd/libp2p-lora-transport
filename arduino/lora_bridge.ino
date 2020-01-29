@@ -24,8 +24,10 @@ void setup() {
     LoRa.setSyncWord(SYNC);
     LoRa.setSpreadingFactor(SF);
     LoRa.setTxPower(TXPOWER);
+    //LoRa.enableCrc();
   //  LoRa.setSignalBandwidth(SIGBW);
     Serial.println("ready");
+    Serial.flush();
 }
 
 // allows debugging LoRa packet note that this is a blocking call
@@ -35,15 +37,18 @@ void handleDebug() {
     if (LoRa.parsePacket()) {
         String message = "received packet: rssi " + String(LoRa.packetRssi()) + " snr " + String(LoRa.packetSnr()) + " freq error " + String(LoRa.packetFrequencyError());
         Serial.println(message);
+        Serial.flush();
         return;
     }
   }
 }
+
 void loop() {
   // see if we have any data on the LoRa radio
   // if we do, send it down the serial interface
   if (LoRa.parsePacket()) {
     Serial.println(LoRa.readString());
+    Serial.flush();
   }
   // see if we have any data on the serial interface
   // if we do send it down hte LoRa radio
@@ -57,7 +62,7 @@ void loop() {
         LoRa.endPacket(true); // async mode
         Serial.println(msg);
         Serial.println(DATASENT);
+        Serial.flush();
     } 
   }
- // delay(1);
 }
