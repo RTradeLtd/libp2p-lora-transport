@@ -18,7 +18,7 @@ API documentation: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API
 */
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     while (!Serial);
     LoRa.begin(BAND);
     LoRa.setSyncWord(SYNC);
@@ -28,6 +28,8 @@ void setup() {
     Serial.println("ready");
 }
 
+// allows debugging LoRa packet note that this is a blocking call
+// and any other usage of the bridge will be blocked until then.
 void handleDebug() {
   while (true) {
     if (LoRa.parsePacket()) {
@@ -38,16 +40,18 @@ void handleDebug() {
   }
 }
 void loop() {
-  // try to parse packet
+  // see if we have any data on the LoRa radio
+  // if we do, send it down the serial interface
   if (LoRa.parsePacket()) {
     Serial.println(LoRa.readString());
-  } else if (Serial.available()) {
+  }
+  // see if we have any data on the serial interface
+  // if we do send it down hte LoRa radio
+  if (Serial.available()) {
     if (LoRa.beginPacket()) { // beginPacket returns 1 if ready to proceed, so wait until radio is ready
         String msg = Serial.readStringUntil('\n');
         if (msg == "debug") {
-          Serial.println("handling debug");
           handleDebug();
-          Serial.println("finished debug handle");
         }
         LoRa.print(msg);
         LoRa.endPacket(true); // async mode
