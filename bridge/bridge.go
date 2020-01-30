@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes"
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -65,9 +65,6 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go handleExit(ctx, cancel, wg, doneChan)
-	var (
-		buffer = bytes.NewBuffer(nil)
-	)
 	_, err = sh.Write([]byte("1"))
 	if err != nil {
 		log.Fatal(err)
@@ -79,13 +76,17 @@ func main() {
 			goto FIN
 		default:
 			data := make([]byte, 255)
-			read, err := sh.Read(data)
+			_, err := sh.Read(data)
 			if err != nil && err != io.EOF {
 				fmt.Println("failed to read data: ", err.Error())
 				goto FIN
 			}
-			fmt.Println(string(data[:read]))
-			buffer.Write(data[:read])
+			msg, err := bufio.NewReader(sh).ReadString('\n')
+			if err != nil {
+				fmt.Println("failed to read data: ", err.Error())
+				goto FIN
+			}
+			fmt.Println(msg)
 		}
 	}
 FIN:
