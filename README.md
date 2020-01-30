@@ -18,6 +18,13 @@ An Arduino Mega + Dragino LoRa GPS Shield, or ES32 LoRa chips such as those from
 
 Using these two functions we can then implement a LibP2P transport, satisfying the "Write" and "Read" interfaces, where "Read" means to read data coming out the serial interface, and "Write" means to write data out the LoRa interface.
 
+## Serial Communications
+
+The serial interface on the arduino is used to allow our LibP2P nodes access to the LoRa module. Anytime data is sent from the arduino to the LibP2P node, messages are wrapped in `^`. For example, should we wish to send a message to another LoRa node thats says `hello` we should send `^hello^`. Controlling the LoRa bridge is done via single letter "control characters". The current control characters are:
+
+* `1` - Toggle debug mode
+  * Debug mode switches processing so that anytime a LoRa packet is received, debug information is sent thorugh the serial interface containing the RSSI, SNR, and Error Frequency of the LoRa packet.
+
 ## Possible Variations:
 
 * Instead of a transport, have it be a "protocol", where supporting hosts can provide access to a type of protocol, that allows reading/writing from the LoRa interface
