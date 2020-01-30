@@ -1,6 +1,13 @@
 # libp2p-lora-transport
 
-This is an experimental libp2p transport for communicating over LoRa, and possibly LoRaWAN. It is meant to be used with the Dragino LoRa GPS shields. And is capable of receiving data on LoRa and sending it through the serial interface, or reading from the serial interface and sending it thorugh LoRa. Essentially the arduino's act as a bridge between LoRa and LibP2P.
+`libp2p-lora-transport` enables LibP2P nodes to communicate over LoRa. You can either use it as a "protocol" where a LibP2P nodes with an attached LoRa bridge can allow authorized peers to read/write data from/to the LoRa bridge. For example, this could be used to allow a LibP2P nodes to report sensor data to a LoRaWAN gateway. Another possibility would be to allow multiple different LibP2P nodes to relay data through a LibP2P node with an attached LoRa bridge.
+
+# Hardware
+
+The following hardware has been tested:
+
+* Arduino Mega 2560 Rev3 + [Dragino LoRa Shield Rev 1.4](http://wiki.dragino.com/index.php?title=Lora_Shield)
+
 
 # Architecture
 
