@@ -32,7 +32,7 @@ void setup() {
   LoRa.onReceive(onReceive);
   LoRa.onTxDone(onTxDone);
   LoRa.enableCrc();
-  //  LoRa.setSignalBandwidth(SIGBW);
+  // LoRa.setSignalBandwidth(SIGBW);
   LoRa.receive(); // set receive mode, allows using callback
   Serial.println("ready");
   Serial.flush();
@@ -54,7 +54,7 @@ void onReceive(int packetSize) {
 // followed by going back to non-debug onreceive callback
 void onReceiveDebug(int packetSize) {
   if (packetSize) {
-    Serial.println("rssi: " + String(LoRa.packetRssi()) + " snr: " + String(LoRa.packetSnr()) + " errFreq: " + String(LoRa.packetFrequencyError()) + " \n");
+    Serial.println("rssi: " + String(LoRa.packetRssi()) + "\tsnr: " + String(LoRa.packetSnr()) + "\terrFreq: " + String(LoRa.packetFrequencyError()));
     Serial.flush();    
   }
   LoRa.onReceive(onReceive);
@@ -73,15 +73,19 @@ void loop() {
   if (Serial.available()) {
     char buffer[255]; // 255 byte buffer
     int num = Serial.readBytesUntil('\n', buffer, 255);
-    if (num == 1) {
-      if (buffer[0] == '2') { // debug mode
-        LoRa.onReceive(onReceiveDebug);
-      }
-    } else if (num > 1) {
-      if (LoRa.beginPacket()) { // beginPacket returns 1 if ready to proceed, so wait until radio is ready
-        LoRa.write(buffer, num);
-        LoRa.endPacket(true); // async mode
-      }
+    switch (num) {
+      case 1:
+        if (buffer[0] == '1') { // debug mode, otherwise fallthrough
+          LoRa.onReceive(onReceiveDebug);
+          break;
+        }
+      default:
+        if (num >= 1) {
+          if (LoRa.beginPacket()) { // beginPacket returns 1 if ready to proceed, so wait until radio is ready
+            LoRa.write(buffer, num);
+            LoRa.endPacket(true); // async mode
+          }
+        }
     }
   }
 }
