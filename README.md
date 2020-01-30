@@ -21,3 +21,7 @@ Using these two functions we can then implement a LibP2P transport, satisfying t
 ## Possible Variations:
 
 * Instead of a transport, have it be a "protocol", where supporting hosts can provide access to a type of protocol, that allows reading/writing from the LoRa interface
+
+# License
+
+All non firmata code is licensed under AGPLv3
