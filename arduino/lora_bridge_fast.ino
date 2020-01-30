@@ -46,26 +46,27 @@ void setup() {
 void onReceive(int packetSize) {
   if (packetSize) {
     if (debug) {
-      Serial.println("rssi: " + String(LoRa.packetRssi()) + " snr: " + String(LoRa.packetSnr()) + " errFreq: " + String(LoRa.packetFrequencyError()) + "\t");
+      Serial.print(String(LoRa.packetRssi()) + "," + String(LoRa.packetSnr()) + "," + String(LoRa.packetFrequencyError()) + "\t");
       Serial.flush();
       return;          
     }
     char buffer[255];
     int num = LoRa.readBytes(buffer, 255);
     Serial.write(buffer, num);
-    Serial.println();
+    Serial.print("\n");
     Serial.flush();
   }
 }
 
 // callback function whenever we finished sending a LoRa packet
 void onTxDone() {
-  Serial.println(DATASENT);
+  Serial.print(DATASENT);
 //  Serial.flush();
   LoRa.receive(); // put us back in receive mode to allow usage of call back
 }
 
-void loop() {
+// https://www.arduino.cc/reference/en/language/functions/communication/serial/serialevent/
+void serialEvent() {
   // see if we have any data on the serial interface
   // if we do send it down hte LoRa radio
   if (Serial.available()) {
@@ -91,3 +92,5 @@ void loop() {
     }
   }
 }
+
+void loop() {}
