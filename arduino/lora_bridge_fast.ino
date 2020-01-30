@@ -26,7 +26,7 @@ volatile bool debug;
 */
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(2500000);
   while (!Serial);
   LoRa.begin(BAND);
   LoRa.setSyncWord(SYNC);

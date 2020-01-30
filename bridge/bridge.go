@@ -47,7 +47,7 @@ func (b *Bridge) Write(data []byte) (int, error) {
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	trm, err := term.Open("/dev/ttyACM0", term.Speed(115200))
+	trm, err := term.Open("/dev/ttyACM0", term.Speed(2500000))
 	if err != nil {
 		log.Fatal(err)
 	}

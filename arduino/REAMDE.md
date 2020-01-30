@@ -26,3 +26,5 @@ rssi: -70	snr: 10.00	errFreq: -3263
 rssi: -73	snr: 
 9.25	errFreq: -3263
 ```
+
+I think the above issue might be related to `baud` issues?? trying with a `2500000` baud vs a `115200` results in the error happening a lot less
