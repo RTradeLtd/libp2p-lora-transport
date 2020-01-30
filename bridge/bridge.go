@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -59,6 +58,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	var msg strings.Builder
 	for {
 		select {
 		case <-ctx.Done():
@@ -73,17 +73,27 @@ func main() {
 				continue
 			}
 			data := make([]byte, size)
-			_, err = trm.Read(data)
+			s, err := trm.Read(data)
 			if err != nil && err != io.EOF {
 				fmt.Println("failed to read data: ", err.Error())
 				goto FIN
 			}
-			msg, err := bufio.NewReader(bytes.NewReader(data)).ReadString('\t')
-			if err != nil && err != io.EOF {
-				fmt.Println("failed to read data: ", err.Error())
-				goto FIN
+			for i, d := range data[:s] {
+				if d == '^' {
+					if i == (len(data[:s]) - 1) {
+						fmt.Println("---")
+						fmt.Println(msg.String())
+						fmt.Println("---")
+						msg.Reset()
+						break
+					}
+				} else {
+					if err := msg.WriteByte(d); err != nil {
+						fmt.Println("error writing byte: ", err.Error())
+						goto FIN
+					}
+				}
 			}
-			fmt.Println(msg)
 		}
 	}
 FIN:

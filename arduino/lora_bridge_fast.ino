@@ -5,6 +5,15 @@
    Data coming in through the serial interface leaves through the LoRa radio
    Data coming in through the LoRa radio exits the serial interface
    This is the "fast" version and operates on bytes instead of strings
+
+  API documentation: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md
+  Issues with timing: https://github.com/sandeepmistry/arduino-LoRa/issues/321
+  Other example:
+    https://github.com/IoTThinks/EasyLoRaGateway_v2.1/blob/master/EasyLoRaGateway/09_lora.ino
+    Useful doc https://www.arduino.cc/en/Tutorial/SerialCallResponse
+
+  Flow Control Protocol:
+    messages are wrapped in carrats
 */
 
 #define BAND 915E6
@@ -12,18 +21,8 @@
 #define SF 7
 #define TXPOWER 20
 #define SIGBW 250E3
-#define DATASENT 0xd34db33f
 
-// means this can be accessed by other parts of the program
-volatile bool debug; 
-
-/*
-  API documentation: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md
-  Issues with timing: https://github.com/sandeepmistry/arduino-LoRa/issues/321
-  Other example:
-    https://github.com/IoTThinks/EasyLoRaGateway_v2.1/blob/master/EasyLoRaGateway/09_lora.ino
-    Useful doc https://www.arduino.cc/en/Tutorial/SerialCallResponse
-*/
+volatile bool debug;  // means this can be accessed by other parts of the program
 
 void setup() {
   Serial.begin(2500000);
@@ -46,22 +45,21 @@ void setup() {
 void onReceive(int packetSize) {
   if (packetSize) {
     if (debug) {
-      Serial.print(String(LoRa.packetRssi()) + "," + String(LoRa.packetSnr()) + "," + String(LoRa.packetFrequencyError()) + "\t");
+      Serial.print("^" + String(LoRa.packetRssi()) + "," + String(LoRa.packetSnr()) + "," + String(LoRa.packetFrequencyError()) + "^");
       Serial.flush();
       return;          
     }
     char buffer[255];
+    Serial.print("^");
     int num = LoRa.readBytes(buffer, 255);
     Serial.write(buffer, num);
-    Serial.print("\n");
+    Serial.print("^");
     Serial.flush();
   }
 }
 
 // callback function whenever we finished sending a LoRa packet
 void onTxDone() {
-  Serial.print(DATASENT);
-//  Serial.flush();
   LoRa.receive(); // put us back in receive mode to allow usage of call back
 }
 
