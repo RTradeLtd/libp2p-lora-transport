@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jacobsa/go-serial/serial"
+	"github.com/pkg/term"
 )
 
 // Bridge enables a LibP2P node to communicate over LoRa
@@ -47,46 +47,38 @@ func (b *Bridge) Write(data []byte) (int, error) {
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	config := serial.OpenOptions{
-		PortName:        "/dev/ttyACM0",
-		BaudRate:        115200,
-		DataBits:        8,
-		ParityMode:      0,
-		StopBits:        1,
-		MinimumReadSize: 4,
-		//	ReadTimeout: time.Second * 10,
-	}
-	sh, err := serial.Open(config)
+	trm, err := term.Open("/dev/ttyACM0", term.Speed(115200))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer sh.Close()
 	doneChan := make(chan bool, 1)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go handleExit(ctx, cancel, wg, doneChan)
-	_, err = sh.Write([]byte("1"))
+	_, err = trm.Write([]byte("1"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	time.Sleep(time.Second * 5)
+	trm.Flush()
 	for {
 		select {
 		case <-ctx.Done():
 			goto FIN
 		default:
 			data := make([]byte, 255)
-			_, err := sh.Read(data)
+			_, err := trm.Read(data)
 			if err != nil && err != io.EOF {
 				fmt.Println("failed to read data: ", err.Error())
 				goto FIN
 			}
-			msg, err := bufio.NewReader(sh).ReadString('\n')
+			msg, err := bufio.NewReader(trm).ReadString('\n')
 			if err != nil {
 				fmt.Println("failed to read data: ", err.Error())
 				goto FIN
 			}
 			fmt.Println(msg)
+			trm.Flush()
 		}
 	}
 FIN:
