@@ -46,7 +46,7 @@ void setup() {
 void onReceive(int packetSize) {
   if (packetSize) {
     if (debug) {
-      Serial.println("rssi: " + String(LoRa.packetRssi()) + "\tsnr: " + String(LoRa.packetSnr()) + "\terrFreq: " + String(LoRa.packetFrequencyError()));
+      Serial.println("rssi: " + String(LoRa.packetRssi()) + " snr: " + String(LoRa.packetSnr()) + " errFreq: " + String(LoRa.packetFrequencyError()) + "\t");
       Serial.flush();
       return;          
     }
@@ -58,21 +58,10 @@ void onReceive(int packetSize) {
   }
 }
 
-// debug callback handler, when set intercepts
-// the next packet, printing debug info to serial
-// followed by going back to non-debug onreceive callback
-void onReceiveDebug(int packetSize) {
-  if (packetSize) {
-    Serial.print("rssi: " + String(LoRa.packetRssi()) + "snr: " + String(LoRa.packetSnr()) + "errFreq: " + String(LoRa.packetFrequencyError()));
-    Serial.flush();    
-  }
-  LoRa.onReceive(onReceive);
-}
-
 // callback function whenever we finished sending a LoRa packet
 void onTxDone() {
   Serial.println(DATASENT);
-  Serial.flush();
+//  Serial.flush();
   LoRa.receive(); // put us back in receive mode to allow usage of call back
 }
 
