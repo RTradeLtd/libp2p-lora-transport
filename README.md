@@ -10,3 +10,7 @@ An Arduino Mega + Dragino LoRa GPS Shield, or ES32 LoRa chips such as those from
 * Take data coming in on the LoRa interface, and push it out the serial interface
 
 Using these two functions we can then implement a LibP2P transport, satisfying the "Write" and "Read" interfaces, where "Read" means to read data coming out the serial interface, and "Write" means to write data out the LoRa interface.
+
+## Possible Variations:
+
+* Instead of a transport, have it be a "protocol", where supporting hosts can provide access to a type of protocol, that allows reading/writing from the LoRa interface
