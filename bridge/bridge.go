@@ -61,6 +61,10 @@ func main() {
 		dataBuffer []byte
 		delim      int
 	)
+	_, err = sh.Write([]byte("1"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	for {
 	START:
 		select {
@@ -94,6 +98,7 @@ func main() {
 		}
 		fmt.Println(string(trimmed))
 		dataBuffer = []byte{}
+		delim = 0
 		goto START
 	}
 FIN:
