@@ -13,6 +13,9 @@
 #define SIGBW 250E3
 #define DATASENT 0xd34db33f
 
+// means this can be accessed by other parts of the program
+volatile bool debug; 
+
 /*
   API documentation: https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md
   Issues with timing: https://github.com/sandeepmistry/arduino-LoRa/issues/321
@@ -41,6 +44,11 @@ void setup() {
 // callback function whenever we receive a LoRa packet
 void onReceive(int packetSize) {
   if (packetSize) {
+    if (debug) {
+      Serial.println("rssi: " + String(LoRa.packetRssi()) + "\tsnr: " + String(LoRa.packetSnr()) + "\terrFreq: " + String(LoRa.packetFrequencyError()));
+      Serial.flush();
+      return;          
+    }
     char buffer[255];
     int num = LoRa.readBytes(buffer, 255);
     Serial.write(buffer, num);
@@ -76,7 +84,7 @@ void loop() {
     switch (num) {
       case 1:
         if (buffer[0] == '1') { // debug mode, otherwise fallthrough
-          LoRa.onReceive(onReceiveDebug);
+          debug = !debug;
           break;
         }
       default:
