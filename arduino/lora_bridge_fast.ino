@@ -1,4 +1,5 @@
 #include <LoRa.h>
+#include <util/atomic.h> // this library includes the ATOMIC_BLOCK macro.
 /* LibP2P LoRa Transport Arduino Bridge
    Enables a LibP2P node to send messages over LoRa and possibly LoRaWAN.
    Data coming in through the serial interface leaves through the LoRa radio
@@ -84,7 +85,11 @@ void loop() {
     switch (num) {
       case 1:
         if (buffer[0] == '1') { // debug mode, otherwise fallthrough
-          debug = !debug;
+          ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+            // code with interrupts blocked (consecutive atomic operations will not get interrupted)
+            // https://www.arduino.cc/reference/en/language/variables/variable-scope--qualifiers/volatile/
+            debug = !debug; 
+          }
           break;
         }
       default:
