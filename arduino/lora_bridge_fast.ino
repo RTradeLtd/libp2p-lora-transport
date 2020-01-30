@@ -63,7 +63,7 @@ void onReceive(int packetSize) {
 // followed by going back to non-debug onreceive callback
 void onReceiveDebug(int packetSize) {
   if (packetSize) {
-    Serial.println("rssi: " + String(LoRa.packetRssi()) + "\tsnr: " + String(LoRa.packetSnr()) + "\terrFreq: " + String(LoRa.packetFrequencyError()));
+    Serial.print("rssi: " + String(LoRa.packetRssi()) + "snr: " + String(LoRa.packetSnr()) + "errFreq: " + String(LoRa.packetFrequencyError()));
     Serial.flush();    
   }
   LoRa.onReceive(onReceive);

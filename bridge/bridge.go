@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -9,13 +10,14 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
-	"github.com/tarm/serial"
+	"github.com/jacobsa/go-serial/serial"
 )
 
 // Bridge enables a LibP2P node to communicate over LoRa
 type Bridge struct {
-	serial     *serial.Port
+	serial     io.ReadWriteCloser
 	ctx        context.Context
 	cancelFunc context.CancelFunc
 	mx         *sync.RWMutex
@@ -45,61 +47,46 @@ func (b *Bridge) Write(data []byte) (int, error) {
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
-	config := &serial.Config{
-		Name: "/dev/ttyACM0",
-		Baud: 115200,
+	config := serial.OpenOptions{
+		PortName:        "/dev/ttyACM0",
+		BaudRate:        115200,
+		DataBits:        8,
+		ParityMode:      0,
+		StopBits:        1,
+		MinimumReadSize: 4,
+		//	ReadTimeout: time.Second * 10,
 	}
-	sh, err := serial.OpenPort(config)
+	sh, err := serial.Open(config)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer sh.Close()
 	doneChan := make(chan bool, 1)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go handleExit(ctx, cancel, wg, doneChan)
 	var (
-		dataBuffer []byte
-		delim      int
+		buffer = bytes.NewBuffer(nil)
 	)
 	_, err = sh.Write([]byte("1"))
 	if err != nil {
 		log.Fatal(err)
 	}
+	time.Sleep(time.Second * 5)
 	for {
-	START:
 		select {
 		case <-ctx.Done():
 			goto FIN
 		default:
-			data := make([]byte, 1024)
+			data := make([]byte, 255)
 			read, err := sh.Read(data)
 			if err != nil && err != io.EOF {
 				fmt.Println("failed to read data: ", err.Error())
 				goto FIN
 			}
-			if read > 0 {
-				dataBuffer = append(dataBuffer, data[:read]...)
-				count := 0
-				for _, c := range dataBuffer {
-					if c == '\n' {
-						delim = count
-						goto PRINT
-					}
-					count++
-				}
-			}
+			fmt.Println(string(data[:read]))
+			buffer.Write(data[:read])
 		}
-	PRINT:
-		var trimmed []byte
-		for _, c := range dataBuffer[:delim] {
-			if c != ' ' {
-				trimmed = append(trimmed, c)
-			}
-		}
-		fmt.Println(string(trimmed))
-		dataBuffer = []byte{}
-		delim = 0
-		goto START
 	}
 FIN:
 	cancel()
