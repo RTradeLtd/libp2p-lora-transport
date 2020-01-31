@@ -16,34 +16,46 @@ import (
 // ProtocolID is the protocol ID of the liblora bridge
 var ProtocolID = protocol.ID("/liblora-bridge/0.0.1")
 
+// Bridge allows authorized peers to open a stream
+// and read/write data through the LoRa bridge
 type Bridge struct {
 	serial          *term.Term
 	ctx             context.Context
-	cancelFunc      context.CancelFunc
 	mx              sync.Mutex
 	authorizedPeers map[peer.ID]bool
 	logger          *zap.Logger
 }
 
-// SerialRead is used to read data off the serial interface
-func (b *Bridge) SerialRead(out []byte) (int, error) {
-	return b.serial.Read(out)
+// Opts allows configuring the bridge
+type Opts struct {
+	SerialDevice    string
+	Baud            int
+	AuthorizedPeers map[peer.ID]bool // empty means allow all
 }
 
-// SerialWrite is used to write data into the serial interface
-func (b *Bridge) SerialWrite(data []byte) (int, error) {
-	return b.serial.Write(data)
+// NewBridge returns an initialized bridge, suitable for use a LibP2P protocol
+func NewBridge(ctx context.Context, logger *zap.Logger, opt Opts) (*Bridge, error) {
+	trm, err := term.Open(opt.SerialDevice, term.Speed(opt.Baud))
+	if err != nil {
+		return nil, err
+	}
+	return &Bridge{
+		serial:          trm,
+		ctx:             ctx,
+		authorizedPeers: opt.AuthorizedPeers,
+		logger:          logger.Named("lora.bridge"),
+	}, nil
 }
 
 // StreamHandler is used to open a bi-directional stream.
 // Only one stream may be opened at a time
 func (b *Bridge) StreamHandler(stream network.Stream) {
-	if !b.authorizedPeers[stream.Conn().RemotePeer()] {
+	defer stream.Reset()
+	if b.authorizedPeers != nil && !b.authorizedPeers[stream.Conn().RemotePeer()] {
 		_, err := stream.Write([]byte("unauthorized"))
 		if err != nil {
 			b.logger.Error("failed to write response back")
 		}
-		stream.Close()
 	}
 	b.mx.Lock()
 	defer b.mx.Unlock()
