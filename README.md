@@ -11,12 +11,14 @@ The following hardware has been tested:
 
 # Architecture
 
-An Arduino Mega + Dragino LoRa GPS Shield, or ES32 LoRa chips such as those from heltec run the "lora bridge" sketch contained in the `arduino` folder. This sketch serves two purposes:
+Using an Arduino Mega + Dragino LoRa GPS shield, a sketch called "lora bridge" is deployed to the arduino. This sketch is responsible for two things:
 
 * Take data coming in on the serial interface, and push it out the LoRa interface
 * Take data coming in on the LoRa interface, and push it out the serial interface
 
-Using these two functions we can then implement a LibP2P transport, satisfying the "Write" and "Read" interfaces, where "Read" means to read data coming out the serial interface, and "Write" means to write data out the LoRa interface.
+A LibP2P host with a direct connection to the arduino serial interface registers a bridge handler that connects to the arduino. This bridge handler creates two channels, one for writing data into the serial interface, one for reading data out of the serial interface. A goroutine is then launched, which will pull data off the write channel, and pipe it into the serial interface. If no data is available for writing, we then see if any data can be read off the serial interface. If we can, we read the data, and send it through the read channel. If no one is waiting to receive from the channel, the data is simply discarded.
+
+The bridge will ensure that all messages coming off the serial interface are properly formatted (wrapped in carrats `^`), if the messages aren't they are also discarded.
 
 ## Serial Communications
 
@@ -24,10 +26,6 @@ The serial interface on the arduino is used to allow our LibP2P nodes access to 
 
 * `1` - Toggle debug mode
   * Debug mode switches processing so that anytime a LoRa packet is received, debug information is sent thorugh the serial interface containing the RSSI, SNR, and Error Frequency of the LoRa packet.
-
-## Possible Variations:
-
-* Instead of a transport, have it be a "protocol", where supporting hosts can provide access to a type of protocol, that allows reading/writing from the LoRa interface
 
 # License
 

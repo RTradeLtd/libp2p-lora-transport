@@ -86,11 +86,17 @@ func (b *Bridge) serialDumper(wg *sync.WaitGroup) {
 					b.logger.Error("error reading serial data", zap.Error(err))
 					return
 				}
+				// flush unread bytes
+				b.serial.Flush()
 				// skip improperly formatted messages
 				if data[0] != '^' || data[len(data)-1] != '^' {
 					continue
 				}
-				b.readChan <- data[:s]
+				select {
+				case b.readChan <- data[:s]:
+				case <-b.ctx.Done():
+				default:
+				}
 			}
 		}
 	}()
