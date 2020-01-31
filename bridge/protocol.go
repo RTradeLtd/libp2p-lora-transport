@@ -82,6 +82,10 @@ func (b *Bridge) StreamHandler(stream network.Stream) {
 					b.logger.Error("error reading serial data", zap.Error(err))
 					return
 				}
+				// skip improperly formatted messages
+				if data[0] != '^' || data[len(data)-1] != '^' {
+					continue
+				}
 				_, err = stream.Write(data[:s])
 				if err != nil {
 					b.logger.Error("failed to write serial data", zap.Error(err))

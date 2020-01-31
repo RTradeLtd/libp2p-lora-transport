@@ -14,36 +14,6 @@ import (
 	"github.com/pkg/term"
 )
 
-// Bridge enables a LibP2P node to communicate over LoRa
-type Bridge struct {
-	serial     io.ReadWriteCloser
-	ctx        context.Context
-	cancelFunc context.CancelFunc
-	mx         *sync.RWMutex
-}
-
-// Read processes data coming in from the serial interface
-func (b *Bridge) Read() {
-	b.mx.RLock()
-	data := make([]byte, 1024)
-	read, err := b.serial.Read(data)
-	if err != nil && err != io.EOF {
-		panic(err)
-	}
-	if read > 0 {
-		fmt.Println(string(data[:read]))
-	}
-	b.mx.RUnlock()
-}
-
-// Write sends data through the serial interface
-func (b *Bridge) Write(data []byte) (int, error) {
-	b.mx.Lock()
-	n, err := b.serial.Write(data)
-	b.mx.Unlock()
-	return n, err
-}
-
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	trm, err := term.Open("/dev/ttyACM0", term.Speed(2500000))
@@ -58,7 +28,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var msg strings.Builder
+	var (
+		msg strings.Builder
+	)
 	for {
 		select {
 		case <-ctx.Done():
@@ -78,6 +50,10 @@ func main() {
 				fmt.Println("failed to read data: ", err.Error())
 				goto FIN
 			}
+			// skip improperly formatted messages
+			if data[0] != '^' || data[len(data)-1] != '^' {
+				continue
+			}
 			for i, d := range data[:s] {
 				if d == '^' {
 					if i == (len(data[:s]) - 1) {
@@ -87,11 +63,10 @@ func main() {
 						msg.Reset()
 						break
 					}
-				} else {
-					if err := msg.WriteByte(d); err != nil {
-						fmt.Println("error writing byte: ", err.Error())
-						goto FIN
-					}
+				}
+				if err := msg.WriteByte(d); err != nil {
+					fmt.Println("error writing byte: ", err.Error())
+					goto FIN
 				}
 			}
 		}
