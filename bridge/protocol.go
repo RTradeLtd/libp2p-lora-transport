@@ -50,7 +50,7 @@ func NewBridge(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, opt 
 		writeChan:       make(chan []byte),
 		wg:              wg,
 	}
-	go bridge.serialDumper(wg)
+	bridge.serialDumper(wg)
 	return bridge, nil
 }
 
@@ -119,12 +119,12 @@ func (b *Bridge) StreamHandler(stream network.Stream) {
 		default:
 			if reader.Size() > 0 {
 				data := make([]byte, reader.Size())
-				_, err := reader.Read(data)
+				s, err := reader.Read(data)
 				if err != nil {
 					b.logger.Error("failed to read data from stream buffer", zap.Error(err))
 					return
 				}
-				b.writeChan <- data
+				b.writeChan <- data[:s]
 			}
 		}
 	}
