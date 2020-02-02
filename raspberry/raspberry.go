@@ -15,10 +15,16 @@ package main
 #include <sys/ioctl.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
-#include <rpi.c>
+#include <raspberry.c>
 */
 import "C"
+import (
+	"log"
+)
 
 func main() {
-	C.HelloWorld()
+	_, err := C.Setup(true)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

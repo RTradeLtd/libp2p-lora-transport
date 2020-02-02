@@ -18,4 +18,4 @@ clean:
 
 
 build-cgo:
-	CGO_CFLAGS_ALLOW='.*' go build rpi.go
+	CGO_CFLAGS_ALLOW='.*' go build raspberry.go

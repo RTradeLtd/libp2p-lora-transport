@@ -8,7 +8,6 @@ The following hardware has been tested:
 
 * Arduino Mega 2560 Rev3 + [Dragino LoRa Shield Rev 1.4](http://wiki.dragino.com/index.php?title=Lora_Shield)
 
-
 # Architecture
 
 Using an Arduino Mega + Dragino LoRa GPS shield, a sketch called "lora bridge" is deployed to the arduino. This sketch is responsible for two things:
