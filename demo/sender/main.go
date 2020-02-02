@@ -5,6 +5,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"sync"
@@ -99,13 +100,11 @@ func main() {
 				if streamReader.Size() > 0 {
 					data := make([]byte, streamReader.Size())
 					s, err := streamReader.Read(data)
-					if err != nil {
+					if err != nil && err != io.EOF {
 						log.Error(err)
 						return
 					}
 					fmt.Println(string(data[:s]))
-					streamReader.Discard(streamReader.Size())
-					strm.Write([]byte("next"))
 				}
 				/*	if inputReader.Size() > 0 {
 						data, err := inputReader.ReadString('\n')

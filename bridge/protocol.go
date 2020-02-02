@@ -1,7 +1,6 @@
 package bridge
 
 import (
-	"bufio"
 	"context"
 	"io"
 	"sync"
@@ -102,6 +101,7 @@ func (b *Bridge) serialDumper() {
 				if data[0] != '^' || data[len(data)-1] != '^' {
 					continue
 				}
+				data = append(data, '\n')
 				b.logger.Info("sending received serial data")
 				select {
 				case b.readChan <- data[:s]:
@@ -122,7 +122,7 @@ func (b *Bridge) StreamHandler(stream network.Stream) {
 			b.logger.Error("failed to write response back")
 		}
 	}
-	reader := bufio.NewReader(stream)
+	//	reader := bufio.NewReader(stream)
 	for {
 		select {
 		case <-b.ctx.Done():
@@ -135,18 +135,19 @@ func (b *Bridge) StreamHandler(stream network.Stream) {
 				return
 			}
 			b.logger.Info("finished writing data into stream")
-		default:
-			if reader.Size() > 0 {
-				b.logger.Info("got data to write")
-				data := make([]byte, reader.Size())
-				s, err := reader.Read(data)
-				if err != nil {
-					b.logger.Error("failed to read data from stream buffer", zap.Error(err))
-					return
+			/*	default:
+				if reader.Size() > 0 {
+					b.logger.Info("got data to write")
+					data := make([]byte, reader.Size())
+					s, err := reader.Read(data)
+					if err != nil {
+						b.logger.Error("failed to read data from stream buffer", zap.Error(err))
+						return
+					}
+					b.writeChan <- data[:s]
+					b.logger.Info("finished passing data to write")
 				}
-				b.writeChan <- data[:s]
-				b.logger.Info("finished passing data to write")
-			}
+			}*/
 		}
 	}
 }
