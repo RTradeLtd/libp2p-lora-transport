@@ -36,11 +36,11 @@ type Opts struct {
 }
 
 // NewBridge returns an initialized bridge, suitable for use a LibP2P protocol
-func NewBridge(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, opt Opts) (*Bridge, error) {
-	trm, err := term.Open(opt.SerialDevice, term.Speed(opt.Baud))
+func NewBridge(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, trm *term.Term, opt Opts) (*Bridge, error) {
+	/*trm, err := term.Open(opt.SerialDevice, term.Speed(opt.Baud))
 	if err != nil {
 		return nil, err
-	}
+	}*/
 	bridge := &Bridge{
 		serial:          trm,
 		ctx:             ctx,
