@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 
@@ -26,21 +27,28 @@ func devTerm(t *testing.T) *term.Term {
 }
 
 func Test_SerialDumper(t *testing.T) {
-	trm := devTerm(t)
-	defer trm.Close()
+	fserial := NewFakeSerial()
 	logger := zaptest.NewLogger(t)
-	bridge, err := NewBridge(context.Background(), &sync.WaitGroup{}, logger, trm, Opts{})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	bridge, err := NewBridge(ctx, &sync.WaitGroup{}, logger, fserial, Opts{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	go func() {
-		_, err := bridge.serial.Write([]byte("^hello^"))
-		if err != nil {
-			t.Error(err)
-		}
-	}()
+	s, err := fserial.Write([]byte("^hello^"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s != len("^hello^") {
+		t.Fatal("err")
+	}
+	fmt.Println("1")
+	// cause a trigger of the "write loop"
+	bridge.writeChan <- []byte("^hello^")
+	fmt.Println(2)
 	data := <-bridge.readChan
-	if string(data) != "hello" {
+	if string(data) != "^hello^" {
+		fmt.Println(string(data))
 		t.Fatal("bad test data")
 	}
 }
