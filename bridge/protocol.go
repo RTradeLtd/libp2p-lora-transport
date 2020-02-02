@@ -110,10 +110,12 @@ func (b *Bridge) serialDumper() {
 // StreamHandler is used to open a bi-directional stream.
 func (b *Bridge) StreamHandler(stream network.Stream) {
 	defer stream.Reset()
-	if b.authorizedPeers != nil && !b.authorizedPeers[stream.Conn().RemotePeer()] {
-		_, err := stream.Write([]byte("unauthorized"))
-		if err != nil {
-			b.logger.Error("failed to write response back")
+	if b.authorizedPeers != nil {
+		if !b.authorizedPeers[stream.Conn().RemotePeer()] {
+			_, err := stream.Write([]byte("unauthorized"))
+			if err != nil {
+				b.logger.Error("failed to write response back")
+			}
 		}
 	}
 	reader := bufio.NewReader(stream)
