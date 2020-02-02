@@ -99,7 +99,6 @@ func Test_StreamHandler(t *testing.T) {
 			panic("fuck")
 		}
 		defer s.Close()
-		s.Write([]byte("^yo dawg this is some test data^"))
 		reader := bufio.NewReader(s)
 		for {
 			select {
@@ -107,6 +106,7 @@ func Test_StreamHandler(t *testing.T) {
 				return
 			default:
 			}
+			s.Write([]byte("^yo dawg this is some test data^"))
 			if reader.Size() > 0 {
 				data := make([]byte, reader.Size())
 				s, err := reader.Read(data)
