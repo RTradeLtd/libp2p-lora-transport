@@ -100,13 +100,14 @@ func Test_StreamHandler(t *testing.T) {
 		}
 		defer s.Close()
 		reader := bufio.NewReader(s)
+		i := 0
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			default:
 			}
-			s.Write([]byte("^yo dawg this is some test data^"))
+			s.Write([]byte(fmt.Sprintf("^yo dawg this is some test data-%v^", i)))
 			if reader.Size() > 0 {
 				data := make([]byte, reader.Size())
 				s, err := reader.Read(data)
@@ -117,6 +118,7 @@ func Test_StreamHandler(t *testing.T) {
 				}
 				fmt.Println(string(data[:s]))
 			}
+			i++
 		}
 	}()
 	time.Sleep(time.Second * 20)
