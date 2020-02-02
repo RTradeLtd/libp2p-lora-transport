@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"sync"
@@ -91,7 +90,7 @@ func main() {
 	func() {
 		defer strm.Reset()
 		streamReader := bufio.NewReader(strm)
-		inputReader := bufio.NewReader(os.Stdin)
+		//inputReader := bufio.NewReader(os.Stdin)
 		for {
 			select {
 			case <-ctx.Done():
@@ -105,19 +104,22 @@ func main() {
 						return
 					}
 					fmt.Println(string(data[:s]))
+					streamReader.Discard(streamReader.Size())
+					strm.Write([]byte("next"))
 				}
-				if inputReader.Size() > 0 {
-					data, err := inputReader.ReadString('\n')
-					if err != nil && err != io.EOF {
-						log.Error(err)
-						return
+				/*	if inputReader.Size() > 0 {
+						data, err := inputReader.ReadString('\n')
+						if err != nil && err != io.EOF {
+							log.Error(err)
+							return
+						}
+						_, err = strm.Write([]byte(data))
+						if err != nil {
+							log.Error(err)
+							return
+						}
 					}
-					_, err = strm.Write([]byte(data))
-					if err != nil {
-						log.Error(err)
-						return
-					}
-				}
+				*/
 			}
 		}
 	}()

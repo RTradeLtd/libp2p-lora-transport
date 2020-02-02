@@ -94,6 +94,10 @@ func (b *Bridge) serialDumper() {
 					b.logger.Error("error reading serial data", zap.Error(err))
 					return
 				}
+				b.serial.Flush()
+				if s <= 1 {
+					continue
+				}
 				// skip improperly formatted messages
 				if data[0] != '^' || data[len(data)-1] != '^' {
 					continue
