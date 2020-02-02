@@ -72,11 +72,13 @@ func (b *Bridge) serialDumper() {
 			case <-b.ctx.Done():
 				return
 			case data := <-b.writeChan:
+				b.logger.Info("writing data to serial interface")
 				_, err := b.serial.Write(data)
 				if err != nil && err != io.EOF {
 					b.logger.Error("failed to write into serial interface", zap.Error(err))
 					return
 				}
+				b.logger.Info("finished writing serial data")
 			default:
 				avail, err := b.serial.Available()
 				if err != nil && err != io.EOF {
@@ -86,6 +88,7 @@ func (b *Bridge) serialDumper() {
 				if avail == 0 {
 					continue
 				}
+				b.logger.Info("got data ro read")
 				data := make([]byte, avail)
 				s, err := b.serial.Read(data)
 				if err != nil && err != io.EOF {
@@ -100,6 +103,7 @@ func (b *Bridge) serialDumper() {
 				case b.readChan <- data[:s]:
 				case <-b.ctx.Done():
 				}
+				b.logger.Info("finished reading serial data")
 			}
 		}
 	}()
@@ -122,11 +126,12 @@ func (b *Bridge) StreamHandler(stream network.Stream) {
 		case data := <-b.readChan:
 			_, err := stream.Write(data)
 			if err != nil {
-				b.logger.Error("failed to write into stream")
+				b.logger.Error("failed to write into stream", zap.Error(err))
 				return
 			}
 		default:
 			if reader.Size() > 0 {
+				b.logger.Info("got data to write")
 				data := make([]byte, reader.Size())
 				s, err := reader.Read(data)
 				if err != nil {
@@ -134,6 +139,7 @@ func (b *Bridge) StreamHandler(stream network.Stream) {
 					return
 				}
 				b.writeChan <- data[:s]
+				b.logger.Info("finished passing data to write")
 			}
 		}
 	}
