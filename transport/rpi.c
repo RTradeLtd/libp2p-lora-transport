@@ -425,6 +425,18 @@ void txlora(byte *frame, byte datalen) {
     printf("send: %s\n", frame);
 }
 
+
+void setupPins() {
+    pinMode(ssPin, OUTPUT);
+    pinMode(dio0, INPUT);
+    pinMode(RST, OUTPUT);
+}
+
+void HelloWorld() {
+    printf("hello world");
+}
+/*
+
 int main (int argc, char *argv[]) {
 
     if (argc < 2) {
@@ -476,4 +488,4 @@ int main (int argc, char *argv[]) {
     }
 
     return (0);
-}
+}*/

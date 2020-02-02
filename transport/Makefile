@@ -15,3 +15,7 @@ main.o: main.c
 
 clean:
 	rm *.o dragino_lora_app	
+
+
+build-cgo:
+	CGO_CFLAGS_ALLOW='.*' go build rpi.go
