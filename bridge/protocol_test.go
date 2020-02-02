@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"testing"
@@ -49,4 +50,58 @@ func Test_SerialDumper(t *testing.T) {
 		fmt.Println(string(data))
 		t.Fatal("bad test data")
 	}
+}
+
+var _ Serial = (*FakeSerial)(nil)
+
+// FakeSerial implements fake serial
+type FakeSerial struct {
+	mx          sync.RWMutex
+	errNextCall bool
+	nextRead    []byte
+}
+
+func NewFakeSerial() *FakeSerial {
+	return &FakeSerial{}
+}
+
+func (fs *FakeSerial) ToggleError() {
+	fs.errNextCall = !fs.errNextCall
+}
+
+func (fs *FakeSerial) Write(data []byte) (int, error) {
+	if fs.errNextCall {
+		return 0, errors.New("error")
+	}
+	fs.nextRead = data
+	return len(data), nil
+}
+
+func (fs *FakeSerial) Available() (int, error) {
+	if fs.errNextCall {
+		return 0, errors.New("error")
+	}
+	return len(fs.nextRead), nil
+}
+
+func (fs *FakeSerial) Read(data []byte) (int, error) {
+	if fs.errNextCall {
+		return 0, errors.New("error")
+	}
+	copy(data, fs.nextRead)
+	return len(data), nil
+}
+
+func (fs *FakeSerial) Flush() error {
+	if fs.errNextCall {
+		return errors.New("error")
+	}
+	return nil
+}
+
+func (fs *FakeSerial) Close() error {
+	if fs.errNextCall {
+		return errors.New("error")
+	}
+	return nil
 }

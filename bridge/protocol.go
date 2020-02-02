@@ -9,11 +9,24 @@ import (
 	"github.com/libp2p/go-libp2p-core/network"
 	peer "github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
+	"github.com/pkg/term"
 	"go.uber.org/zap"
 )
 
 // ProtocolID is the protocol ID of the liblora bridge
 var ProtocolID = protocol.ID("/liblora-bridge/0.0.1")
+
+// ensure term.Term always satisfies this interface
+var _ Serial = (*term.Term)(nil)
+
+// Serial is an interface to provide easy testing of the lora protocol
+type Serial interface {
+	Write([]byte) (int, error)
+	Available() (int, error)
+	Read([]byte) (int, error)
+	Flush() error
+	Close() error
+}
 
 // Bridge allows authorized peers to open a stream
 // and read/write data through the LoRa bridge
@@ -94,7 +107,6 @@ func (b *Bridge) serialDumper() {
 				select {
 				case b.readChan <- data[:s]:
 				case <-b.ctx.Done():
-				default:
 				}
 			}
 		}
