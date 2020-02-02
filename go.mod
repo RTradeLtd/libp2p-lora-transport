@@ -5,9 +5,15 @@ go 1.13
 require (
 	github.com/RTradeLtd/go-libp2p-testutils v1.0.1-0.20200202084327-6a2c922acfea
 	github.com/golang/protobuf v1.3.2 // indirect
-	github.com/libp2p/go-libp2p v0.5.1 // indirect
+	github.com/ipfs/go-datastore v0.1.1
+	github.com/ipfs/go-ipfs-keystore v0.0.1
+	github.com/ipfs/go-ipns v0.0.1
+	github.com/libp2p/go-libp2p v0.5.1
 	github.com/libp2p/go-libp2p-core v0.3.0
 	github.com/libp2p/go-libp2p-kad-dht v0.1.1
+	github.com/libp2p/go-libp2p-peerstore v0.1.4
+	github.com/libp2p/go-libp2p-pnet v0.1.0
+	github.com/libp2p/go-libp2p-record v0.1.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/multiformats/go-multiaddr v0.2.0

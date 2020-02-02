@@ -42,8 +42,6 @@ type Bridge struct {
 
 // Opts allows configuring the bridge
 type Opts struct {
-	SerialDevice    string
-	Baud            int
 	AuthorizedPeers map[peer.ID]bool // empty means allow all
 }
 
