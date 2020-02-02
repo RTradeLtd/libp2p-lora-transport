@@ -19,7 +19,7 @@ var ProtocolID = protocol.ID("/liblora-bridge/0.0.1")
 // Bridge allows authorized peers to open a stream
 // and read/write data through the LoRa bridge
 type Bridge struct {
-	serial          *term.Term
+	serial          Serial
 	ctx             context.Context
 	wg              *sync.WaitGroup
 	authorizedPeers map[peer.ID]bool
@@ -36,13 +36,13 @@ type Opts struct {
 }
 
 // NewBridge returns an initialized bridge, suitable for use a LibP2P protocol
-func NewBridge(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, trm *term.Term, opt Opts) (*Bridge, error) {
+func NewBridge(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, serial Serial, opt Opts) (*Bridge, error) {
 	/*trm, err := term.Open(opt.SerialDevice, term.Speed(opt.Baud))
 	if err != nil {
 		return nil, err
 	}*/
 	bridge := &Bridge{
-		serial:          trm,
+		serial:          serial,
 		ctx:             ctx,
 		authorizedPeers: opt.AuthorizedPeers,
 		logger:          logger.Named("lora.bridge"),
@@ -50,17 +50,17 @@ func NewBridge(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, trm 
 		writeChan:       make(chan []byte),
 		wg:              wg,
 	}
-	bridge.serialDumper(wg)
+	bridge.serialDumper()
 	return bridge, nil
 }
 
 // serialDumper allows any number of libp2p streams to write
 // into the LoRa bridge, or read from it. Reads are sent to any
 // active streams
-func (b *Bridge) serialDumper(wg *sync.WaitGroup) {
-	wg.Add(1)
+func (b *Bridge) serialDumper() {
+	b.wg.Add(1)
 	go func() {
-		defer wg.Done()
+		defer b.wg.Done()
 		for {
 			select {
 			case <-b.ctx.Done():
