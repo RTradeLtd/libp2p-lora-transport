@@ -11,7 +11,9 @@ import (
 
 	dopts "github.com/libp2p/go-libp2p-kad-dht/opts"
 	routedhost "github.com/libp2p/go-libp2p/p2p/host/routed"
+	"github.com/pkg/term"
 
+	bridge "github.com/RTradeLtd/libp2p-lora-transport/bridge"
 	datastore "github.com/ipfs/go-datastore"
 	dssync "github.com/ipfs/go-datastore/sync"
 	"github.com/ipfs/go-ipns"
@@ -27,7 +29,9 @@ import (
 )
 
 var (
-	addr = flag.String("address", "/ip4/0.0.0.0/tcp/4005", "host multi address")
+	addr   = flag.String("address", "/ip4/0.0.0.0/tcp/4005", "host multi address")
+	device = flag.String("device", "/dev/ttyACM0", "serial device name")
+	baud   = flag.Int("baud", 2500000, "default serial device baud")
 )
 
 func init() {
@@ -58,7 +62,19 @@ func main() {
 	var doneChan = make(chan bool, 1)
 	wg.Add(1)
 	go handleExit(ctx, cancel, wg, doneChan)
+	// setup the bridge
+	trm, err := term.Open(*device, term.Speed(*baud))
+	if err != nil {
+		log.Fatal(err)
+	}
+	protocolBridge, err := bridge.NewBridge(ctx, wg, logger, trm, bridge.Opts{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	h.SetStreamHandler(bridge.ProtocolID, protocolBridge.StreamHandler)
+	// wait
 	wg.Wait()
+	protocolBridge.Close()
 }
 
 func handleExit(ctx context.Context, cancelFunc context.CancelFunc, wg *sync.WaitGroup, doneChan chan bool) {
