@@ -2,7 +2,6 @@ package bridge
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/pkg/term"
@@ -38,7 +37,6 @@ func (fs *FakeSerial) Write(data []byte) (int, error) {
 	if fs.errNextCall {
 		return 0, errors.New("error")
 	}
-	fmt.Println(string(data))
 	fs.nextRead = data
 	return len(data), nil
 }

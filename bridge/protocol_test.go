@@ -42,10 +42,8 @@ func Test_SerialDumper(t *testing.T) {
 	if s != len("^hello^") {
 		t.Fatal("err")
 	}
-	fmt.Println("1")
 	// cause a trigger of the "write loop"
 	bridge.writeChan <- []byte("^hello^")
-	fmt.Println(2)
 	data := <-bridge.readChan
 	if string(data) != "^hello^" {
 		fmt.Println(string(data))
