@@ -3,6 +3,7 @@ module github.com/RTradeLtd/libp2p-lora-transport
 go 1.13
 
 require (
+	gitea.com/lunny/log v0.0.0-20190322053110-01b5df579c4e
 	github.com/RTradeLtd/go-libp2p-testutils v1.0.1-0.20200202084327-6a2c922acfea
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/ipfs/go-datastore v0.1.1
