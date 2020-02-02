@@ -1,9 +1,11 @@
 package bridge
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -81,8 +83,6 @@ func Test_StreamHandler(t *testing.T) {
 	h1.Connect(ctx, h2.Peerstore().PeerInfo(h2.ID()))
 	h2.Connect(ctx, h1.Peerstore().PeerInfo(h1.ID()))
 	fserial := NewFakeSerial()
-	// setup some test data
-	fserial.Write([]byte("^hello^"))
 	bridge, err := NewBridge(ctx, wg, zaptest.NewLogger(t), fserial, Opts{})
 	if err != nil {
 		t.Fatal(err)
@@ -100,8 +100,26 @@ func Test_StreamHandler(t *testing.T) {
 		}
 		defer s.Close()
 		s.Write([]byte("^yo dawg this is some test data^"))
+		reader := bufio.NewReader(s)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+			if reader.Size() > 0 {
+				data := make([]byte, reader.Size())
+				s, err := reader.Read(data)
+				if err != nil && !strings.Contains(err.Error(), "stream reset") {
+					t.Error(err)
+				} else if err != nil && strings.Contains(err.Error(), "stream reset") {
+					return
+				}
+				fmt.Println(string(data[:s]))
+			}
+		}
 	}()
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 20)
 	cancel()
 	wg.Wait()
 }
@@ -168,6 +186,7 @@ func (fs *FakeSerial) Read(data []byte) (int, error) {
 		return 0, errors.New("error")
 	}
 	copy(data, fs.nextRead)
+	fs.nextRead = nil
 	return len(data), nil
 }
 
