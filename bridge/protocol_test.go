@@ -41,6 +41,7 @@ func Test_SerialDumper(t *testing.T) {
 	if string(data) != "^hello^" {
 		t.Fatal("bad test data")
 	}
+	bridge.Close()
 }
 
 func Test_StreamHandler(t *testing.T) {
@@ -123,6 +124,7 @@ func Test_StreamHandler(t *testing.T) {
 	}()
 	time.Sleep(time.Second * 20)
 	cancel()
+	bridge.Close()
 	wg.Wait()
 }
 

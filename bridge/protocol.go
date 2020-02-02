@@ -140,3 +140,8 @@ func (b *Bridge) StreamHandler(stream network.Stream) {
 		}
 	}
 }
+
+// Close is used to shutdown the bridge serial interface
+func (b *Bridge) Close() error {
+	return b.serial.Close()
+}
