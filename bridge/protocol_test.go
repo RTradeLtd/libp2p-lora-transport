@@ -45,9 +45,10 @@ func Test_StreamHandler(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	h1, _ := newHost(ctx, t, "/ip4/127.0.0.1/tcp/4005")
+	secret := testutils.NewSecret(t)
+	h1, _ := newHost(ctx, t, "/ip4/127.0.0.1/tcp/4005", secret)
 	defer h1.Close()
-	h2, _ := newHost(ctx, t, "/ip4/127.0.0.1/tcp/4006")
+	h2, _ := newHost(ctx, t, "/ip4/127.0.0.1/tcp/4006", secret)
 	defer h2.Close()
 	h1.ConnManager().Protect(h2.ID(), "test")
 	h2.ConnManager().Protect(h1.ID(), "test")
@@ -102,10 +103,10 @@ func Test_StreamHandler(t *testing.T) {
 	}()
 	time.Sleep(time.Second * 10)
 	cancel()
-	wg.Done()
+	wg.Wait()
 }
 
-func newHost(ctx context.Context, t *testing.T, addr string) (host.Host, *dht.IpfsDHT) {
+func newHost(ctx context.Context, t *testing.T, addr string, secret []byte) (host.Host, *dht.IpfsDHT) {
 	logger := testutils.NewLogger(t)
 	ds := testutils.NewDatastore(t)
 	ps := testutils.NewPeerstore(t)
@@ -113,7 +114,6 @@ func newHost(ctx context.Context, t *testing.T, addr string) (host.Host, *dht.Ip
 	if err != nil {
 		t.Fatal(err)
 	}
-	secret := testutils.NewSecret(t)
 	maddr, err := multiaddr.NewMultiaddr(addr)
 	if err != nil {
 		t.Fatal(err)
