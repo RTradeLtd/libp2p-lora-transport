@@ -49,10 +49,6 @@ type Opts struct {
 
 // NewBridge returns an initialized bridge, suitable for use a LibP2P protocol
 func NewBridge(ctx context.Context, wg *sync.WaitGroup, logger *zap.Logger, serial Serial, opt Opts) (*Bridge, error) {
-	/*trm, err := term.Open(opt.SerialDevice, term.Speed(opt.Baud))
-	if err != nil {
-		return nil, err
-	}*/
 	bridge := &Bridge{
 		serial:          serial,
 		ctx:             ctx,
@@ -98,8 +94,6 @@ func (b *Bridge) serialDumper() {
 					b.logger.Error("error reading serial data", zap.Error(err))
 					return
 				}
-				// flush unread bytes
-				b.serial.Flush()
 				// skip improperly formatted messages
 				if data[0] != '^' || data[len(data)-1] != '^' {
 					continue

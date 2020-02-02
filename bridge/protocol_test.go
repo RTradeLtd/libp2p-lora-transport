@@ -3,29 +3,11 @@ package bridge
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 	"testing"
 
-	"github.com/pkg/term"
-	"github.com/pkg/term/termios"
 	"go.uber.org/zap/zaptest"
 )
-
-func devTerm(t *testing.T) *term.Term {
-	ptm, pts, err := termios.Pty()
-	if err != nil {
-		t.Fatal(err)
-	}
-	ptm.Write([]byte("^hello^"))
-	pts.Write([]byte("^hello^"))
-	trm, err := term.Open(pts.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	//pts.Close()
-	return trm
-}
 
 func Test_SerialDumper(t *testing.T) {
 	fserial := NewFakeSerial()
@@ -47,7 +29,6 @@ func Test_SerialDumper(t *testing.T) {
 	bridge.writeChan <- []byte("^hello^")
 	data := <-bridge.readChan
 	if string(data) != "^hello^" {
-		fmt.Println(string(data))
 		t.Fatal("bad test data")
 	}
 }
@@ -58,6 +39,7 @@ var _ Serial = (*FakeSerial)(nil)
 type FakeSerial struct {
 	mx          sync.RWMutex
 	errNextCall bool
+	nextErr     error
 	nextRead    []byte
 }
 
@@ -65,7 +47,7 @@ func NewFakeSerial() *FakeSerial {
 	return &FakeSerial{}
 }
 
-func (fs *FakeSerial) ToggleError() {
+func (fs *FakeSerial) ToggleError(err error) {
 	fs.errNextCall = !fs.errNextCall
 }
 
@@ -89,6 +71,7 @@ func (fs *FakeSerial) Read(data []byte) (int, error) {
 		return 0, errors.New("error")
 	}
 	copy(data, fs.nextRead)
+	fs.nextRead = nil
 	return len(data), nil
 }
 
