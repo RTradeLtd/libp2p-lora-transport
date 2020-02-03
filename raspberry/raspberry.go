@@ -1,4 +1,4 @@
-package main
+package raspberry
 
 /*
 #cgo CFLAGS: -c -Wall
@@ -18,13 +18,17 @@ package main
 #include <raspberry.c>
 */
 import "C"
-import (
-	"log"
-)
 
-func main() {
-	_, err := C.Setup(true)
+// Bridge is a raspberrypi dragino lora bridge
+type Bridge struct {
+	isSender bool
+}
+
+// NewBridge initializes our Dragino LoRa GPS HAT
+func NewBridge(isSender bool) (*Bridge, error) {
+	_, err := C.Setup(C.bool(isSender))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	return &Bridge{},nil
 }
