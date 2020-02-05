@@ -2,7 +2,6 @@
 
 Contains arduino sketches. Requires master branch of `https://github.com/sandeepmistry/arduino-LoRa`
 
-* `custom_firmata.ino` is a custom version of firmata that starts up the LoRa radio and allows controlling via gobot (TODO)
 * `firmata.ino` is a copy of the firmata sketch
 * `lora_bridge_fast.ino` LoRa bridge for LibP2P nodes
 * `lora_bridge_esp32_heltec.ino` is the LoRa bridge for ESP32 Heltec boards

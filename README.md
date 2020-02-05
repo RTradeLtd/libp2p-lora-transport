@@ -2,6 +2,10 @@
 
 `libp2p-lora-transport` enables LibP2P nodes to communicate over LoRa. You can either use it as a "protocol" where a LibP2P nodes with an attached LoRa bridge can allow authorized peers to read/write data from/to the LoRa bridge. For example, this could be used to allow a LibP2P nodes to report sensor data to a LoRaWAN gateway. Another possibility would be to allow multiple different LibP2P nodes to relay data through a LibP2P node with an attached LoRa bridge.
 
+# Install
+
+You will need a valid C installation, Go 1.13+, and the WiringPi libraries installed.
+
 # Hardware
 
 The following hardware has been tested:
@@ -9,16 +13,21 @@ The following hardware has been tested:
 * Arduino Mega 2560 Rev3 and [Dragino LoRa Shield Rev 1.4](http://wiki.dragino.com/index.php?title=Lora_Shield)
 * Raspberry Pi 3B+ and [Dragino LoRa GPS HAT](http://wiki.dragino.com/index.php?title=Lora/GPS_HAT)
 
-# Software Packages
+# Contents
 
-* `arduino/lora_bridge.ino`
-  * Arduino mega LoRa shield bridge
-* `arduino/lora_bridge.go`
-  * A "demo/test" for the LoRa shield bridge
-* `src/dragino/raspberry.c`
-  * A cleaned up version of the `dragino_lora` app from the `rpi-lora-tranceiver` repository from Dragino's github
-  * Intended to be used as a reusable library, with better documentation
-* `src/dragino/raspberry.go`
+* `arduino`
+  * Contains arduino related sketch files, and includes the LoRa shield bridge
+  * Also includes a copy of the firmata sketch, and a heltec esp32 LoRa board compatible sketch
+* `bridge`
+  * LibP2P golang code providing a transport, and protocol capable of talking over LoRa by way of a directly connected LoRa bridge
+  * Alternatively you will be able to leverage this code, along with the Dragino LoRa GPS HAT to enable LibP2P IPFS nodes that can facilitate swarm communication over LoRa
+  * It is unlikely you will be able to use the LoRa shield bridge, as this requires a serial port connection which is slower
+  * Additionally the arduino is pretty resource constrained and we will be able to achieve higher throughput with the raspberry pi
+* `include`
+  * various C header files
+* `src/dragino`
+  * Contains a modified version of the sample code provided with the Dragino LoRa GPS HAT intended to be used as a library, and easier to maintain
+  * Additionally there is a CGO file allowing golang programs to use the dragino HAT.
   * A cgo library for using the dragino lora gps hat from go programs
 
 # Architecture
@@ -36,9 +45,6 @@ There are two modes of operation:
 
 * Protocol Mode (libp2p protocol that can be accessed through libp2p streams)
 * Transport (used as an actual swarm transport, TODO).
-
-
-The raspberry pi setup can use C, or an optional CGO library.
 
 ## Security
 
