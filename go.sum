@@ -7,8 +7,6 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Kubuxu/go-os-helper v0.0.1/go.mod h1:N8B+I7vPCT80IcP58r50u4+gEEcsZETFUpAzWW2ep1Y=
 github.com/RTradeLtd/go-libp2p-connmgr v1.0.0/go.mod h1:CvB5NlNS7PDuWgY45gTFyiI29Rg+nUWXj0qCcVKtLps=
-github.com/RTradeLtd/go-libp2p-testutils v1.0.0 h1:LlYKQPuj00jjbjp3PvLRkt8lqaT/yA1oJ2Ob2uZ3yIc=
-github.com/RTradeLtd/go-libp2p-testutils v1.0.0/go.mod h1:UhJZon/4xobiwp+r57od2PWd89kND8R4qHj5lIO+624=
 github.com/RTradeLtd/go-libp2p-testutils v1.0.1-0.20200202084327-6a2c922acfea h1:G6AAXk4jiOLqQTPLTGWxRJwe0rp6wttfJNmCm54fX3o=
 github.com/RTradeLtd/go-libp2p-testutils v1.0.1-0.20200202084327-6a2c922acfea/go.mod h1:UhJZon/4xobiwp+r57od2PWd89kND8R4qHj5lIO+624=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=

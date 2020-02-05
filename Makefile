@@ -44,21 +44,18 @@ arduino-deps:
 # dragino lora testing
 # Single lora testing app
 
-CC=g++
+CC=gcc
 CFLAGS=-c -Wall
 LIBS=-lwiringPi -lpthread
 
-all: dragino_lora_app
+dragino_raspberry: main.o
+	$(CC) raspberry.o  $(LIBS) -o dragino_raspberry
 
-dragino_lora_app: main.o
-	$(CC) main.o  $(LIBS) -o dragino_lora_app
-
-main.o: main.c
-	$(CC) $(CFLAGS) main.c
+main.o:
+	$(CC) $(CFLAGS) ./src/dragino/raspberry.c
 
 clean:
 	rm *.o dragino_lora_app	
 
-
 build-cgo:
-	CGO_CFLAGS_ALLOW='.*' go build raspberry.go
+	CGO_CFLAGS_ALLOW='.*' go build ./src/dragino/raspberry.go
