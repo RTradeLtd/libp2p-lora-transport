@@ -41,3 +41,8 @@ The serial interface on the arduino is used to allow our LibP2P nodes access to 
 # License
 
 All non firmata code is licensed under AGPLv3
+
+# Notes:
+
+* https://dave.cheney.net/tag/cgo
+* https://golang.org/cmd/cgo/

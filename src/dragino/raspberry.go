@@ -15,7 +15,7 @@ package raspberry
 #include <sys/ioctl.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
-#include <raspberry.c>
+#include "./raspberry.c"
 */
 import "C"
 
@@ -26,9 +26,9 @@ type Bridge struct {
 
 // NewBridge initializes our Dragino LoRa GPS HAT
 func NewBridge(isSender bool) (*Bridge, error) {
-	_, err := C.Setup(C.bool(isSender))
+	_, err := C.setup(C.bool(isSender))
 	if err != nil {
 		return nil, err
 	}
-	return &Bridge{},nil
+	return &Bridge{}, nil
 }

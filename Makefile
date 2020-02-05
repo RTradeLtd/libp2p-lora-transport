@@ -49,13 +49,13 @@ CFLAGS=-c -O -W -Wextra -Werror -Wall -ansi -pedantic
 LIBS=-lwiringPi -lpthread
 
 dragino_raspberry: main.o
-	$(CC) raspberry.o  $(LIBS) -o dragino_raspberry
+	$(CC) main.o  $(LIBS) -o dragino_raspberry
 
 main.o:
-	$(CC) $(CFLAGS) ./src/dragino/raspberry.c
+	$(CC) $(CFLAGS) ./src/dragino/main.c
 
 clean:
 	rm *.o dragino_lora_app	
 
 build-cgo:
-	CGO_CFLAGS_ALLOW='.*' go build ./src/dragino/raspberry.go
+	CGO_CFLAGS_ALLOW='.*' go build -o lol ./src/dragino/cmd/dragino/main.go

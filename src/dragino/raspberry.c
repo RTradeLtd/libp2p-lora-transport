@@ -42,11 +42,6 @@ uint32_t  freq = 868100000;
 
 byte hello[32] = "HELLO";
 
-void die(const char *s) {
-    perror(s);
-    exit(1);
-}
-
 void selectreceiver() {
     digitalWrite(ssPin, LOW);
 }
@@ -333,53 +328,4 @@ int setup(bool sender) {
     configPower(23);
     
     return 0;
-}
-
-/* an example of how this library can be used */
-int main (int argc, char *argv[]) {
-    bool isSender;
-    int exitCode;
-
-    if (argc < 2) {
-        printf("Usage: argv[1] sender|rec [message]\n");
-        exit(1);
-    }
-    
-    switch (strcmp("sender", argv[1])) {
-        case 0:
-            isSender = false;
-            break;
-        case 1:
-            isSender = true;
-            break;
-        default:
-            perror("invalid strcmp return value");
-            exit(1);
-    }
-    
-    exitCode = setup(isSender);
-    if (!exitCode) {
-        die("invalid exit code: " + exitCode);
-    }
-    
-    if (!isSender) {
-        printf("Send packets at SF%i on %.6f Mhz.\n", sf,(double)freq/1000000);
-        printf("------------------\n");
-        if (argc > 2) {
-            strncpy((char *)hello, argv[2], sizeof(hello));
-        }
-        while(1) {
-            writeData(hello, true);
-            delay(5000);
-        }
-    } else {
-        printf("Listening at SF%i on %.6f Mhz.\n", sf,(double)freq/1000000);
-        printf("------------------\n");
-        while(1) {
-            receivepacket(); 
-            delay(1);
-        }
-    }
-    
-    return (0);
 }
