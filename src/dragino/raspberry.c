@@ -41,24 +41,20 @@ uint32_t  freq = 868100000;
 
 byte hello[32] = "HELLO";
 
-void die(const char *s)
-{
+void die(const char *s) {
     perror(s);
     exit(1);
 }
 
-void selectreceiver()
-{
+void selectreceiver() {
     digitalWrite(ssPin, LOW);
 }
 
-void unselectreceiver()
-{
+void unselectreceiver() {
     digitalWrite(ssPin, HIGH);
 }
 
-byte readReg(byte addr)
-{
+byte readReg(byte addr) {
     unsigned char spibuf[2];
 
     selectreceiver();
@@ -70,8 +66,7 @@ byte readReg(byte addr)
     return spibuf[1];
 }
 
-void writeReg(byte addr, byte value)
-{
+void writeReg(byte addr, byte value) {
     unsigned char spibuf[2];
 
     spibuf[0] = addr | 0x80;
@@ -95,8 +90,7 @@ static void opmodeLora() {
 }
 
 
-void SetupLoRa()
-{
+void SetupLoRa() {
     byte version;
     uint64_t frf;    
     digitalWrite(RST, HIGH);
@@ -302,50 +296,59 @@ void SendData(byte *frame, byte datalen) {
 }
 
 /* is used to setup the LoRa transmitter */
-void Setup(bool sender) {
+int setup(bool sender) {
+    if (!wiringPiSetup()) {
+        return 1;
+    }
     pinMode(ssPin, OUTPUT);
     pinMode(dio0, INPUT);
     pinMode(RST, OUTPUT);
-    wiringPiSPISetup(CHANNEL, 500000);
+    if (!wiringPiSPISetup(CHANNEL, 500000)) {
+        return 1;
+    }
     SetupLoRa();
     if (sender) {
+       /* radio init */
         opmodeLora();
         opmode(OPMODE_STANDBY);
-        /* set PA ramp-up time 50 uSec */
-        writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); 
-        configPower(23);
-        return;
+        opmode(OPMODE_RX);
+        return 0;
     }
     opmodeLora();
+    /* enter standby mode (required for FIFO loading)) */
     opmode(OPMODE_STANDBY);
-    opmode(OPMODE_RX);
+    /* set PA ramp-up time 50 uSec */
+    writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); 
+    configPower(23);
+    return 0;
 }
 
+/*
+ basic implementation of the LoRa HAT.
+ allows sending or receiving data
+*/
 int main (int argc, char *argv[]) {
-
+    bool isSender;
+    int exitCode;
     if (argc < 2) {
         printf ("Usage: argv[0] sender|rec [message]\n");
         exit(1);
     }
-
-    wiringPiSetup () ;
-    pinMode(ssPin, OUTPUT);
-    pinMode(dio0, INPUT);
-    pinMode(RST, OUTPUT);
-
-    wiringPiSPISetup(CHANNEL, 500000);
-
-    SetupLoRa();
-
-    if (!strcmp("sender", argv[1])) {
-        opmodeLora();
-        /* enter standby mode (required for FIFO loading)) */
-        opmode(OPMODE_STANDBY);
-        /* set PA ramp-up time 50 uSec */
-        writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); 
-
-        configPower(23);
-
+    switch (strcmp("sender", argv[1])) {
+        case 0:
+            isSender = false;
+            break;
+        case 1:
+            isSender = true;
+            break;
+        default:
+            die("invalid strcmp return value");
+    }
+    exitCode = setup(isSender);
+    if (!exitCode) {
+        die("invalid exit code: " + exitCode);
+    }
+    if (!isSender) {
         printf("Send packets at SF%i on %.6f Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
 
@@ -357,11 +360,6 @@ int main (int argc, char *argv[]) {
             delay(5000);
         }
     } else {
-
-        /* radio init */
-        opmodeLora();
-        opmode(OPMODE_STANDBY);
-        opmode(OPMODE_RX);
         printf("Listening at SF%i on %.6f Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
         while(1) {
