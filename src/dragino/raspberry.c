@@ -331,7 +331,7 @@ int setup(bool sender) {
 int main (int argc, char *argv[]) {
     bool isSender;
     int exitCode;
-    if (array_len(*argv) < (size_t)2) {
+    if (argc < 2) {
         printf("Usage: argv[0] sender|rec [message]\n");
         exit(1);
     }
