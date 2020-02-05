@@ -45,7 +45,7 @@ arduino-deps:
 # Single lora testing app
 
 CC=gcc
-CFLAGS=-c -Wall -W -ansi -pedantic
+CFLAGS=-c -O -W -Wextra -Werror -Wall -ansi -pedantic
 LIBS=-lwiringPi -lpthread
 
 dragino_raspberry: main.o

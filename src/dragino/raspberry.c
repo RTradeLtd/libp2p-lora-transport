@@ -21,6 +21,7 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include "../../include/dragino/raspberry.h"
+#include "../../include/array_len/array_len.h"
 
 /*******************************************************************************
  *
@@ -330,8 +331,8 @@ int setup(bool sender) {
 int main (int argc, char *argv[]) {
     bool isSender;
     int exitCode;
-    if (argc < 2) {
-        printf ("Usage: argv[0] sender|rec [message]\n");
+    if (array_len(*argv) < (size_t)2) {
+        printf("Usage: argv[0] sender|rec [message]\n");
         exit(1);
     }
     switch (strcmp("sender", argv[1])) {
@@ -342,7 +343,8 @@ int main (int argc, char *argv[]) {
             isSender = true;
             break;
         default:
-            die("invalid strcmp return value");
+            perror("invalid strcmp return value");
+            exit(1);
     }
     exitCode = setup(isSender);
     if (!exitCode) {

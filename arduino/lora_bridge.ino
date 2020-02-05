@@ -18,8 +18,10 @@
 #define SIGBW 250E3
 
 volatile bool debug;  // means this can be accessed by other parts of the program
+volatile char buffer[90][255];
 
 void setup() {
+  malloc(90 * 255);
   Serial.begin(2500000);
   while (!Serial);
   LoRa.begin(BAND);
