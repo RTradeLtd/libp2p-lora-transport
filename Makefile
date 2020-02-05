@@ -52,10 +52,10 @@ dragino_raspberry: main.o
 	$(CC) main.o  $(LIBS) -o dragino_raspberry
 
 main.o:
-	$(CC) $(CFLAGS) ./src/dragino/main.c
+	$(CC) $(CFLAGS) ./main.c
 
 clean:
 	rm *.o dragino_lora_app	
 
 build-cgo:
-	CGO_CFLAGS_ALLOW='.*' go build -o lol ./src/dragino/cmd/dragino/main.go
+	CGO_CFLAGS_ALLOW='.*' go build -o dragino_raspberry_go ./src/dragino/cmd/dragino/main.go

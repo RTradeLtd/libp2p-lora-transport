@@ -32,3 +32,13 @@ func NewBridge(isSender bool) (*Bridge, error) {
 	}
 	return &Bridge{}, nil
 }
+
+// WriteBridge is used to write data into a bridge
+func WriteBridge(data []byte) {
+	// https://stackoverflow.com/questions/51384245/c-ucharbuffer0-vs-c-ucharunsafe-pointerbuffer0
+	var bufptr *byte
+	if cap(data) > 0 {
+		bufptr = &(data[:1][0])
+	}
+	C.writeData((*C.uchar)(bufptr), C.bool(true))
+}

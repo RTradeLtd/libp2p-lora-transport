@@ -30,27 +30,27 @@
  *******************************************************************************/
 
 /* SX1272 - Raspberry connections */
-int ssPin = 6;
-int dio0  = 7;
-int RST   = 0;
+static int ssPin = 6;
+static int dio0  = 7;
+static int RST   = 0;
 
 /* Set spreading factor (SF7 - SF12) */
-enum sf_t sf = SF7;
+static enum sf_t sf = SF7;
 
 /* Sets center frequency - 868.1 Mhz*/
-uint32_t  freq = 868100000;
+static uint32_t  freq = 868100000;
 
-byte hello[32] = "HELLO";
+static byte hello[32] = "HELLO";
 
-void selectreceiver() {
+static void selectreceiver() {
     digitalWrite(ssPin, LOW);
 }
 
-void unselectreceiver() {
+static void unselectreceiver() {
     digitalWrite(ssPin, HIGH);
 }
 
-byte readReg(byte addr) {
+static byte readReg(byte addr) {
     unsigned char spibuf[2];
 
     selectreceiver();
@@ -65,7 +65,7 @@ byte readReg(byte addr) {
     return spibuf[1];
 }
 
-void writeReg(byte addr, byte value) {
+static void writeReg(byte addr, byte value) {
     unsigned char spibuf[2];
 
     spibuf[0] = addr | 0x80;
@@ -94,7 +94,7 @@ static void opmodeLora() {
 }
 
 
-void setupLoRa() {
+static void setupLoRa() {
     byte version;
     uint64_t frf;    
     
@@ -167,7 +167,7 @@ void setupLoRa() {
     writeReg(REG_LNA, LNA_MAX_GAIN);
 }
 
-boolean receive(char *payload) {
+static boolean receive(char *payload) {
     int i, irqflags;
     /* clear rxDone */
     writeReg(REG_IRQ_FLAGS, 0x40);
@@ -193,7 +193,7 @@ boolean receive(char *payload) {
     return true;
 }
 
-void receivepacket() {
+static void receivepacket() {
 
     long int SNR;
     int rssicorr;
@@ -270,7 +270,7 @@ static void writeBuf(byte addr, byte *value, byte len) {
     unselectreceiver();                                                                                 
 }
 
-void txlora(byte *frame, byte datalen) {
+static void txlora(byte *frame, byte datalen) {
     /* set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP */
     writeReg(RegDioMapping1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
     /* clear all radio IRQ flags */
@@ -288,7 +288,7 @@ void txlora(byte *frame, byte datalen) {
 }
 
 /* writeData: helper function that writes data and calculates frame size */
-void writeData(byte *frame, bool debug) {
+static void writeData(byte *frame, bool debug) {
     txlora(frame, strlen((char *)frame));
     if (debug) {
         printf("send: %s\n", frame);
@@ -296,7 +296,7 @@ void writeData(byte *frame, bool debug) {
 }
 
 /* is used to setup the LoRa transmitter */
-int setup(bool sender) {
+static int setup(bool sender) {
     if (!wiringPiSetup()) {
         return 1;
     }

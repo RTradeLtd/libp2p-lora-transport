@@ -6,7 +6,20 @@
 
 The following hardware has been tested:
 
-* Arduino Mega 2560 Rev3 + [Dragino LoRa Shield Rev 1.4](http://wiki.dragino.com/index.php?title=Lora_Shield)
+* Arduino Mega 2560 Rev3 and [Dragino LoRa Shield Rev 1.4](http://wiki.dragino.com/index.php?title=Lora_Shield)
+* Raspberry Pi 3B+ and [Dragino LoRa GPS HAT](http://wiki.dragino.com/index.php?title=Lora/GPS_HAT)
+
+# Software Packages
+
+* `arduino/lora_bridge.ino`
+  * Arduino mega LoRa shield bridge
+* `arduino/lora_bridge.go`
+  * A "demo/test" for the LoRa shield bridge
+* `src/dragino/raspberry.c`
+  * A cleaned up version of the `dragino_lora` app from the `rpi-lora-tranceiver` repository from Dragino's github
+  * Intended to be used as a reusable library, with better documentation
+* `src/dragino/raspberry.go`
+  * A cgo library for using the dragino lora gps hat from go programs
 
 # Architecture
 
@@ -23,6 +36,9 @@ There are two modes of operation:
 
 * Protocol Mode (libp2p protocol that can be accessed through libp2p streams)
 * Transport (used as an actual swarm transport, TODO).
+
+
+The raspberry pi setup can use C, or an optional CGO library.
 
 ## Security
 

@@ -162,7 +162,7 @@ static const int CHANNEL = 0;
 
 char message[256];
 
-bool sx1272 = true;
+static bool sx1272 = true;
 
 byte receivedbytes;
 
