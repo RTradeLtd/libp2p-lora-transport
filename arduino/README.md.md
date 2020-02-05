@@ -2,7 +2,7 @@
 
 Contains arduino sketches. Requires master branch of `https://github.com/sandeepmistry/arduino-LoRa`
 
-* `firmata.ino` is a copy of the firmata sketch
+* For the firmata sketch file see [here](https://gist.github.com/bonedaddy/3c1bf4ff93e4b72372ac2806a24b203d)
 * `lora_bridge_fast.ino` LoRa bridge for LibP2P nodes
 * `lora_bridge_esp32_heltec.ino` is the LoRa bridge for ESP32 Heltec boards
 
