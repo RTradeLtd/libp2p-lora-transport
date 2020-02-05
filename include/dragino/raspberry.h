@@ -24,8 +24,8 @@
 #include <wiringPiSPI.h>
 
 
-// #############################################
-// #############################################
+/* ############################################# */
+/* ############################################# */
 
 #define REG_FIFO                    0x00
 #define REG_OPMODE                  0x01
@@ -51,18 +51,18 @@
 
 #define PAYLOAD_LENGTH              0x40
 
-// LOW NOISE AMPLIFIER
+/* LOW NOISE AMPLIFIER */
 #define REG_LNA                     0x0C
 #define LNA_MAX_GAIN                0x23
 #define LNA_OFF_GAIN                0x00
 #define LNA_LOW_GAIN		    	0x20
 
-#define RegDioMapping1                             0x40 // common
-#define RegDioMapping2                             0x41 // common
+#define RegDioMapping1                             0x40
+#define RegDioMapping2                             0x41
 
-#define RegPaConfig                                0x09 // common
-#define RegPaRamp                                  0x0A // common
-#define RegPaDac                                   0x5A // common
+#define RegPaConfig                                0x09
+#define RegPaRamp                                  0x0A
+#define RegPaDac                                   0x5A
 
 #define SX72_MC2_FSK                0x00
 #define SX72_MC2_SF7                0x70
@@ -72,9 +72,9 @@
 #define SX72_MC2_SF11               0xB0
 #define SX72_MC2_SF12               0xC0
 
-#define SX72_MC1_LOW_DATA_RATE_OPTIMIZE  0x01 // mandated for SF11 and SF12
+#define SX72_MC1_LOW_DATA_RATE_OPTIMIZE  0x01
 
-// sx1276 RegModemConfig1
+/* sx1276 RegModemConfig1 */
 #define SX1276_MC1_BW_125                0x70
 #define SX1276_MC1_BW_250                0x80
 #define SX1276_MC1_BW_500                0x90
@@ -85,14 +85,14 @@
 
 #define SX1276_MC1_IMPLICIT_HEADER_MODE_ON    0x01
 
-// sx1276 RegModemConfig2
+/* sx1276 RegModemConfig2 */
 #define SX1276_MC2_RX_PAYLOAD_CRCON        0x04
 
-// sx1276 RegModemConfig3
+/* sx1276 RegModemConfig3 */
 #define SX1276_MC3_LOW_DATA_RATE_OPTIMIZE  0x08
 #define SX1276_MC3_AGCAUTO                 0x04
 
-// preamble for lora networks (nibbles swapped)
+/* preamble for lora networks (nibbles swapped) */
 #define LORA_MAC_PREAMBLE                  0x34
 
 #define RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1 0x0A
@@ -102,17 +102,17 @@
 #define RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2 0x74
 #endif
 
-// FRF
+/* FRF */
 #define        REG_FRF_MSB              0x06
 #define        REG_FRF_MID              0x07
 #define        REG_FRF_LSB              0x08
 
-#define        FRF_MSB                  0xD9 // 868.1 Mhz
+#define        FRF_MSB                  0xD9
 #define        FRF_MID                  0x06
 #define        FRF_LSB                  0x66
 
-// ----------------------------------------
-// Constants for radio registers
+/* ---------------------------------------- */
+/* Constants for radio registers */
 #define OPMODE_LORA      0x80
 #define OPMODE_MASK      0x07
 #define OPMODE_SLEEP     0x00
@@ -124,8 +124,8 @@
 #define OPMODE_RX_SINGLE 0x06
 #define OPMODE_CAD       0x07
 
-// ----------------------------------------
-// Bits masking the corresponding IRQs from the radio
+/* ---------------------------------------- */
+/* Bits masking the corresponding IRQs from the radio */
 #define IRQ_LORA_RXTOUT_MASK 0x80
 #define IRQ_LORA_RXDONE_MASK 0x40
 #define IRQ_LORA_CRCERR_MASK 0x20
@@ -135,16 +135,25 @@
 #define IRQ_LORA_FHSSCH_MASK 0x02
 #define IRQ_LORA_CDDETD_MASK 0x01
 
-// DIO function mappings                D0D1D2D3
-#define MAP_DIO0_LORA_RXDONE   0x00  // 00------
-#define MAP_DIO0_LORA_TXDONE   0x40  // 01------
-#define MAP_DIO1_LORA_RXTOUT   0x00  // --00----
-#define MAP_DIO1_LORA_NOP      0x30  // --11----
-#define MAP_DIO2_LORA_NOP      0xC0  // ----11--
+/* 
+DIO function mappings
+D0D1D2D:
+// 00------
+// 01------
+// --00----
+// --11----
+// ----11--           
+*/ 
+#define MAP_DIO0_LORA_RXDONE   0x00
+#define MAP_DIO0_LORA_TXDONE   0x40
+#define MAP_DIO1_LORA_RXTOUT   0x00
+#define MAP_DIO1_LORA_NOP      0x30
+#define MAP_DIO2_LORA_NOP      0xC0
 
-// #############################################
-// #############################################
-//
+/* 
+   #############################################
+   #############################################
+*/
 
 typedef bool boolean;
 typedef unsigned char byte;
