@@ -11,5 +11,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	raspberry.WriteBridge([]byte("hello"))
+	for i := 0; i < 1000; i++ {
+		raspberry.WriteBridge([]byte("hello"))
+	}
 }
