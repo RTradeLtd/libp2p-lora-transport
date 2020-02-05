@@ -167,3 +167,21 @@ static bool sx1272 = true;
 byte receivedbytes;
 
 enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };
+
+static int setup(bool sender);
+
+static byte readReg(byte addr);
+
+static boolean receive(char *payload);
+
+static void writeBuf(byte addr, byte *value, byte len);
+static void writeData(byte *frame, bool debug);
+static void txlora(byte *frame, byte datalen);
+static void writeReg(byte addr, byte value);
+static void configPower (int8_t pw);
+static void opmode (uint8_t mode);
+static void unselectreceiver();
+static void selectreceiver();
+static void receivepacket();
+static void opmodeLora();
+static void setupLoRa();

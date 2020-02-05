@@ -40,8 +40,6 @@ static enum sf_t sf = SF7;
 /* Sets center frequency - 868.1 Mhz*/
 static uint32_t  freq = 868100000;
 
-static byte hello[32] = "HELLO";
-
 static void selectreceiver() {
     digitalWrite(ssPin, LOW);
 }
