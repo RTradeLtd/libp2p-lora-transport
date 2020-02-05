@@ -59,9 +59,12 @@ byte readReg(byte addr) {
     unsigned char spibuf[2];
 
     selectreceiver();
+   
     spibuf[0] = addr & 0x7F;
     spibuf[1] = 0x00;
+   
     wiringPiSPIDataRW(CHANNEL, spibuf, 2);
+   
     unselectreceiver();
 
     return spibuf[1];
@@ -72,7 +75,9 @@ void writeReg(byte addr, byte value) {
 
     spibuf[0] = addr | 0x80;
     spibuf[1] = value;
+    
     selectreceiver();
+
     wiringPiSPIDataRW(CHANNEL, spibuf, 2);
 
     unselectreceiver();
@@ -84,23 +89,26 @@ static void opmode (uint8_t mode) {
 
 static void opmodeLora() {
     uint8_t u = OPMODE_LORA;
+  
     /* TBD: sx1276 high freq */
-    if (sx1272 == false)
+    if (sx1272 == false) {
         u |= 0x8;   
+    }
+
     writeReg(REG_OPMODE, u);
 }
 
 
-void SetupLoRa() {
+void setupLoRa() {
     byte version;
     uint64_t frf;    
+    
     digitalWrite(RST, HIGH);
     delay(100);
     digitalWrite(RST, LOW);
     delay(100);
 
     version = readReg(REG_VERSION);
-
     if (version == 0x22) {
         /* sx1272 */
         printf("SX1272 detected, starting.\n");
@@ -156,13 +164,12 @@ void SetupLoRa() {
     } else {
         writeReg(REG_SYMB_TIMEOUT_LSB,0x08);
     }
+
     writeReg(REG_MAX_PAYLOAD_LENGTH,0x80);
     writeReg(REG_PAYLOAD_LENGTH,PAYLOAD_LENGTH);
     writeReg(REG_HOP_PERIOD,0xFF);
     writeReg(REG_FIFO_ADDR_PTR, readReg(REG_FIFO_RX_BASE_AD));
-
     writeReg(REG_LNA, LNA_MAX_GAIN);
-
 }
 
 boolean receive(char *payload) {
@@ -172,23 +179,22 @@ boolean receive(char *payload) {
     irqflags = readReg(REG_IRQ_FLAGS);
 
     /*  payload crc: 0x20 */
-    if((irqflags & 0x20) == 0x20)
-    {
+    if ((irqflags & 0x20) == 0x20) {
         printf("CRC error\n");
         writeReg(REG_IRQ_FLAGS, 0x20);
         return false;
     } else {
-
         byte currentAddr = readReg(REG_FIFO_RX_CURRENT_ADDR);
         byte receivedCount = readReg(REG_RX_NB_BYTES);
         receivedbytes = receivedCount;
 
         writeReg(REG_FIFO_ADDR_PTR, currentAddr);
-        for(i = 0; i < receivedCount; i++)
-        {
+
+        for (i = 0; i < receivedCount; i++) {
             payload[i] = (char)readReg(REG_FIFO);
         }
     }
+
     return true;
 }
 
@@ -197,20 +203,17 @@ void receivepacket() {
     long int SNR;
     int rssicorr;
 
-    if(digitalRead(dio0) == 1)
-    {
-        if(receive(message)) {
+    if (digitalRead(dio0) == 1) {
+        if (receive(message)) {
             /* received a message */
             byte value = readReg(REG_PKT_SNR_VALUE);
             /* The SNR sign bit is 1 */
-            if( value & 0x80 ) 
-            {
+            if ( value & 0x80 ) {
                 /* Invert and divide by 4 */
                 value = ( ( ~value + 1 ) & 0xFF ) >> 2;
                 SNR = -value;
             }
-            else
-            {
+            else {
                 /* Divide by 4 */
                 SNR = ( value & 0xFF ) >> 2;
             }
@@ -236,7 +239,7 @@ void receivepacket() {
 static void configPower (int8_t pw) {
     if (sx1272 == false) {
         /* no boost used for now */
-        if(pw >= 17) {
+        if (pw >= 17) {
             pw = 15;
         } else if(pw < 2) {
             pw = 2;
@@ -247,9 +250,9 @@ static void configPower (int8_t pw) {
 
     } else {
         /* set PA config (2-17 dBm using PA_BOOST) */
-        if(pw > 17) {
+        if (pw > 17) {
             pw = 17;
-        } else if(pw < 2) {
+        } else if (pw < 2) {
             pw = 2;
         }
         writeReg(RegPaConfig, (uint8_t)(0x80|(pw-2)));
@@ -260,10 +263,13 @@ static void configPower (int8_t pw) {
 static void writeBuf(byte addr, byte *value, byte len) {                                                       
     int i;
     unsigned char spibuf[256];                                                                          
+    
     spibuf[0] = addr | 0x80;                                                                            
+    
     for (i = 0; i < len; i++) {                                                                         
         spibuf[i + 1] = value[i];                                                                       
     }                                                                                                   
+    
     selectreceiver();                                                                                   
     wiringPiSPIDataRW(CHANNEL, spibuf, len + 1);                                                        
     unselectreceiver();                                                                                 
@@ -299,13 +305,17 @@ int setup(bool sender) {
     if (!wiringPiSetup()) {
         return 1;
     }
+    
     pinMode(ssPin, OUTPUT);
     pinMode(dio0, INPUT);
     pinMode(RST, OUTPUT);
+    
     if (!wiringPiSPISetup(CHANNEL, 500000)) {
         return 1;
     }
-    SetupLoRa();
+    
+    setupLoRa();
+    
     if (sender) {
        /* radio init */
         opmodeLora();
@@ -313,26 +323,28 @@ int setup(bool sender) {
         opmode(OPMODE_RX);
         return 0;
     }
+    
     opmodeLora();
     /* enter standby mode (required for FIFO loading)) */
     opmode(OPMODE_STANDBY);
     /* set PA ramp-up time 50 uSec */
     writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); 
+    /* set radio power */
     configPower(23);
+    
     return 0;
 }
 
-/*
- basic implementation of the LoRa HAT.
- allows sending or receiving data
-*/
+/* an example of how this library can be used */
 int main (int argc, char *argv[]) {
     bool isSender;
     int exitCode;
+
     if (argc < 2) {
         printf("Usage: argv[1] sender|rec [message]\n");
         exit(1);
     }
+    
     switch (strcmp("sender", argv[1])) {
         case 0:
             isSender = false;
@@ -344,17 +356,18 @@ int main (int argc, char *argv[]) {
             perror("invalid strcmp return value");
             exit(1);
     }
+    
     exitCode = setup(isSender);
     if (!exitCode) {
         die("invalid exit code: " + exitCode);
     }
+    
     if (!isSender) {
         printf("Send packets at SF%i on %.6f Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
-
-        if (argc > 2)
+        if (argc > 2) {
             strncpy((char *)hello, argv[2], sizeof(hello));
-
+        }
         while(1) {
             writeData(hello, true);
             delay(5000);
@@ -366,8 +379,7 @@ int main (int argc, char *argv[]) {
             receivepacket(); 
             delay(1);
         }
-
     }
-
+    
     return (0);
 }
