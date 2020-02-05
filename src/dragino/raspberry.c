@@ -332,7 +332,7 @@ int main (int argc, char *argv[]) {
     bool isSender;
     int exitCode;
     if (argc < 2) {
-        printf("Usage: argv[0] sender|rec [message]\n");
+        printf("Usage: argv[1] sender|rec [message]\n");
         exit(1);
     }
     switch (strcmp("sender", argv[1])) {
