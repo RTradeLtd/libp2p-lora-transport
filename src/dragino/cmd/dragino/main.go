@@ -12,6 +12,6 @@ func main() {
 		log.Fatal(err)
 	}
 	for i := 0; i < 1000; i++ {
-		raspberry.WriteBridge([]byte("hello"))
+		raspberry.WriteBridge([]byte(fmt.Sprintf("hello: %v", i)))
 	}
 }
