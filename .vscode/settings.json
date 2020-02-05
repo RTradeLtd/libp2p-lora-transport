@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "atomic": "cpp",
+        "*.tcc": "cpp",
+        "cstddef": "cpp",
+        "functional": "cpp",
+        "memory_resource": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "memory": "cpp",
+        "typeinfo": "cpp"
+    }
+}
