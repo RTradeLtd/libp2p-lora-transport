@@ -97,13 +97,14 @@ static void opmodeLora() {
 
 void SetupLoRa()
 {
-    
+    byte version;
+    uint64_t frf;    
     digitalWrite(RST, HIGH);
     delay(100);
     digitalWrite(RST, LOW);
     delay(100);
 
-    byte version = readReg(REG_VERSION);
+    version = readReg(REG_VERSION);
 
     if (version == 0x22) {
         /* sx1272 */
@@ -130,7 +131,7 @@ void SetupLoRa()
     opmode(OPMODE_SLEEP);
 
     /* set frequency */
-    uint64_t frf = ((uint64_t)freq << 19) / 32000000;
+    frf = ((uint64_t)freq << 19) / 32000000;
     writeReg(REG_FRF_MSB, (uint8_t)(frf>>16) );
     writeReg(REG_FRF_MID, (uint8_t)(frf>> 8) );
     writeReg(REG_FRF_LSB, (uint8_t)(frf>> 0) );
@@ -170,10 +171,10 @@ void SetupLoRa()
 }
 
 boolean receive(char *payload) {
+    int i, irqflags;
     /* clear rxDone */
     writeReg(REG_IRQ_FLAGS, 0x40);
-
-    int irqflags = readReg(REG_IRQ_FLAGS);
+    irqflags = readReg(REG_IRQ_FLAGS);
 
     /*  payload crc: 0x20 */
     if((irqflags & 0x20) == 0x20)
@@ -188,7 +189,6 @@ boolean receive(char *payload) {
         receivedbytes = receivedCount;
 
         writeReg(REG_FIFO_ADDR_PTR, currentAddr);
-        int i;
         for(i = 0; i < receivedCount; i++)
         {
             payload[i] = (char)readReg(REG_FIFO);
@@ -346,7 +346,7 @@ int main (int argc, char *argv[]) {
 
         configPower(23);
 
-        printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
+        printf("Send packets at SF%i on %.6f Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
 
         if (argc > 2)
@@ -362,7 +362,7 @@ int main (int argc, char *argv[]) {
         opmodeLora();
         opmode(OPMODE_STANDBY);
         opmode(OPMODE_RX);
-        printf("Listening at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
+        printf("Listening at SF%i on %.6f Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
         while(1) {
             receivepacket(); 
