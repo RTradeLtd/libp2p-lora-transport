@@ -270,30 +270,28 @@ static void writeBuf(byte addr, byte *value, byte len) {
 }
 
 void txlora(byte *frame, byte datalen) {
-
     /* set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP */
     writeReg(RegDioMapping1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
     /* clear all radio IRQ flags */
     writeReg(REG_IRQ_FLAGS, 0xFF);
     /* mask all IRQs but TxDone */
     writeReg(REG_IRQ_FLAGS_MASK, ~IRQ_LORA_TXDONE_MASK);
-
     /* initialize the payload size and address pointers */
     writeReg(REG_FIFO_TX_BASE_AD, 0x00);
     writeReg(REG_FIFO_ADDR_PTR, 0x00);
     writeReg(REG_PAYLOAD_LENGTH, datalen);
-
     /* download buffer to the radio FIFO */
     writeBuf(REG_FIFO, frame, datalen);
     /* now we actually start the transmission */
     opmode(OPMODE_TX);
-
-    printf("send: %s\n", frame);
 }
 
-/* exported function for sending lora data */
-void SendData(byte *frame, byte datalen) {
-    txlora(frame, datalen);
+/* writeData: helper function that writes data and calculates frame size */
+void writeData(byte *frame, bool debug) {
+    txlora(frame, strlen((char *)frame));
+    if (debug) {
+        printf("send: %s\n", frame);
+    }
 }
 
 /* is used to setup the LoRa transmitter */
@@ -358,7 +356,7 @@ int main (int argc, char *argv[]) {
             strncpy((char *)hello, argv[2], sizeof(hello));
 
         while(1) {
-            txlora(hello, strlen((char *)hello));
+            writeData(hello, true);
             delay(5000);
         }
     } else {
