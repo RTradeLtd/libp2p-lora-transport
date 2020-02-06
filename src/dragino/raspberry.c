@@ -327,3 +327,13 @@ static int setup(bool sender) {
     
     return 0;
 }
+
+/* receivePacketData: returns the data received from a LoRa packet */
+char * receivePacketData() {
+    byte value;
+    if (digitalRead(dio0) == 1) {
+        if (receive(message)) {
+            return message;
+        }
+    }
+}
