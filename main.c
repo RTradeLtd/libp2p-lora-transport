@@ -22,6 +22,8 @@
 #include <wiringPiSPI.h>
 #include "./src/dragino/raspberry.c"
 
+byte hello[32] = "HELLO";
+
 /* an example of how this library can be used */
 int main (int argc, char *argv[]) {
     bool isSender;
